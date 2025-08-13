@@ -1,0 +1,2558 @@
+// backend/server.js
+
+const express = require('express');
+const fetch = require('node-fetch'); // Để fetch nội dung từ URL
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const axios = require('axios');
+const diff = require('diff');
+const { exec } = require('child_process');
+const { spawn } = require('child_process');
+const multer = require('multer');
+const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose();
+const session = require('express-session');
+const crypto = require('crypto'); // Để tính mã băm (hash)
+const { Client } = require('ssh2');
+const { Server } = require('ws');
+
+require('dotenv').config(); // Thêm dòng này để sử dụng dotenv
+
+// backend/server.js
+const { executeCommand } = require('./commands/sshExecutor');
+
+const app = express();
+const port = 1234;
+
+// Biến toàn cục để lưu trữ thông tin SSH
+let globalSshInfo = {};
+
+// Tăng giới hạn kích thước payload
+app.use(bodyParser.json({ limit: '10mb' })); // Cho phép payload JSON lên đến 10MB
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
+// Thiết lập session !!!!!!!!!!!!!!!!!!!!!!
+app.use(session({
+    secret: 'your_super_secret_key', // Thay bằng một khóa bí mật mạnh
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Đặt secure: true khi sử dụng HTTPS
+}));
+
+
+// Đặt thư mục public làm static
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Route GET '/' chuyển hướng đến '/login' nếu chưa đăng nhập hoặc '/index' nếu đã đăng nhập
+app.get('/', (req, res) => {
+    if (req.session.isAuthenticated) {
+        res.redirect('/index.html');
+    } else {
+        res.redirect('/login');
+    }
+});
+
+// Route GET '/login' để phục vụ trang login.html
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html', 'login.html'));
+});
+
+// Route POST '/login' để xử lý đăng nhập và lưu thông tin thiết bị vào session
+app.post('/login', (req, res) => {
+    const { deviceId } = req.body; // Lấy deviceId từ body
+
+    console.log('Received device ID:', deviceId);  // Log giá trị deviceId nhận được từ frontend
+
+    // Kiểm tra xem người dùng đã cung cấp đủ thông tin chưa
+    if (!deviceId) {
+        return res.status(400).json({ message: 'Vui lòng chọn thiết bị.' });
+    }
+
+    const db = new sqlite3.Database('devices.db'); // Đảm bảo đường dẫn đúng của cơ sở dữ liệu
+
+    db.get('SELECT * FROM devices WHERE id = ?', [deviceId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);  // Log chi tiết lỗi truy vấn
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (!row) {
+            console.log('No device found with ID:', deviceId);  // Log khi không tìm thấy thiết bị
+            return res.status(404).json({ message: 'Thiết bị không tìm thấy' });
+        }
+
+        console.log('Device details:', row);  // Log thông tin thiết bị
+
+        // Lưu thông tin thiết bị vào session
+        req.session.deviceInfo = row;
+
+        res.json({ message: 'Login successful!' });
+    });
+});
+
+// Middleware kiểm tra xác thực
+function isAuthenticated(req, res, next) {
+    if (req.session.deviceInfo) {
+        // Nếu đã có thông tin thiết bị trong session, kiểm tra tính hợp lệ trong DB
+        const deviceId = req.session.deviceInfo.id;
+
+        const db = new sqlite3.Database('devices.db'); // Đảm bảo đường dẫn đúng của cơ sở dữ liệu
+
+        db.get('SELECT * FROM devices WHERE id = ?', [deviceId], (err, row) => {
+            if (err) {
+                console.error('Error querying database:', err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            if (!row) {
+                return res.status(404).json({ message: 'Device not found' });
+            }
+
+            // Thiết bị hợp lệ, tiếp tục
+            req.session.deviceInfo = row;
+            next();
+        });
+    } else {
+        // Nếu không có thông tin thiết bị trong session, yêu cầu đăng nhập lại
+        res.redirect('/login');
+    }
+}
+
+//============================================================================================================================//
+// Route GET '/index' để phục vụ trang index.html sau khi đăng nhập thành công
+app.get('/index.html',  (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html', 'index.html'));
+});
+
+//============================================================================================================================//
+// Route GET '/logout' để đăng xuất người dùng
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            return res.redirect('/index.html');
+        }
+        res.clearCookie('connect.sid'); // Tên cookie mặc định
+        res.redirect('/login');
+    });
+});
+
+
+
+//============================================================================================================================//
+// đăng ký thiết bị
+
+
+// Kết nối tới cơ sở dữ liệu SQLite (hoặc tạo mới nếu chưa tồn tại)
+// Kết nối cơ sở dữ liệu SQLite
+const db = new sqlite3.Database('./devices.db', (err) => {
+    if (err) {
+        console.error('Error opening database:', err);
+    } else {
+        console.log('Connected to SQLite database');
+    }
+});
+
+// Tạo bảng devices nếu chưa có
+db.run(`
+    CREATE TABLE IF NOT EXISTS devices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        device_name TEXT NOT NULL,
+        device_ip TEXT NOT NULL,
+        device_user_name TEXT NOT NULL,
+        device_password TEXT NOT NULL
+    )
+`);
+
+
+// API để lấy danh sách thiết bị đã đăng ký
+app.get('/get-registered-devices', (req, res) => {
+    db.all('SELECT * FROM devices', [], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows);
+    });
+});
+
+
+// API để lấy thông tin thiết bị theo id
+app.get('/get-device-details/:id', (req, res) => {
+    const deviceId = req.params.id;  // Lấy deviceId từ URL params
+
+    const db = new sqlite3.Database('devices.db');  // Đảm bảo đường dẫn đúng của cơ sở dữ liệu
+
+    // Truy vấn để lấy thông tin thiết bị từ cơ sở dữ liệu
+    db.get('SELECT * FROM devices WHERE id = ?', [deviceId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (!row) {
+            console.log('No device found with ID:', deviceId);
+            return res.status(404).json({ message: 'Thiết bị không tìm thấy' });
+        }
+
+        // Trả về thông tin thiết bị dưới dạng JSON
+        res.json(row);
+        db.close();
+    });
+});
+
+// Route POST '/save-device-session' để lưu thông tin thiết bị vào session
+app.post('/save-device-session', (req, res) => {
+    const deviceInfo = req.body; // Lấy thông tin thiết bị từ body
+
+    if (!deviceInfo) {
+        return res.status(400).json({ message: 'Không có thông tin thiết bị để lưu vào session.' });
+    }
+
+    // Lưu thông tin thiết bị vào session
+    req.session.deviceInfo = deviceInfo;
+
+    // Tạo thông tin SSH từ deviceInfo
+    const sshInfo = {
+        address: deviceInfo.deviceIP,  // Địa chỉ IP của thiết bị
+        pass: deviceInfo.devicePassword // Mật khẩu của thiết bị
+    };
+
+    // Lưu thông tin SSH vào session
+    req.session.sshInfo = sshInfo;
+
+    // Trả về thông báo thành công
+    res.json({ message: 'Thông tin thiết bị và SSH đã được lưu vào session.' });
+});
+
+
+
+// API để đăng ký thiết bị mới
+app.post('/register-device', (req, res) => {
+    const { deviceName, deviceIP, deviceUserName, devicePassword } = req.body;
+
+    console.log("Received data:", deviceName, deviceIP, deviceUserName, devicePassword); // Kiểm tra dữ liệu nhận được
+
+    if (!deviceName || !deviceIP || !deviceUserName || !devicePassword) {
+        return res.status(400).json({ success: false, message: 'Tất cả các trường thông tin đều bắt buộc!' });
+    }
+
+    const query = 'INSERT INTO devices (device_name, device_ip, device_user_name, device_password) VALUES (?, ?, ?, ?)';
+    db.run(query, [deviceName, deviceIP, deviceUserName, devicePassword], function(err) {
+        if (err) {
+            console.error("Error during DB insertion:", err.message); // In ra lỗi nếu có
+            return res.status(500).json({ success: false, message: err.message });
+        }
+        res.status(200).json({ success: true, message: 'Device registered successfully!', id: this.lastID });
+    });
+});
+
+
+// API để xóa thiết bị
+app.delete('/delete-device/:id', (req, res) => {
+    const deviceId = req.params.id;
+
+    const query = 'DELETE FROM devices WHERE id = ?';
+    db.run(query, [deviceId], function (err) {
+        if (err) {
+            console.error("Error deleting device:", err.message);
+            return res.status(500).json({ success: false, message: 'Không thể xóa thiết bị!' });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, message: 'Thiết bị không tìm thấy!' });
+        }
+        res.status(200).json({ success: true, message: 'Thiết bị đã được xóa thành công!' });
+    });
+});
+
+
+
+//============================================================================================================================//
+// đăng ký thiết bị
+//============================================================================================================================//
+
+
+
+//============================================================================================================================//
+// Route để lấy số lượng rules categories
+app.get('/api/rules/count',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        const count = await executeCommand(address, 'root', pass, 'ls -1 /etc/suricata/rules/*.rules 2>/dev/null | wc -l');
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//============================================================================================================================//
+// Route để lấy số lượng rules đang có
+app.get('/api/rules/countall',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        // Lệnh tìm tất cả các file có đuôi .rules trong thư mục /etc/suricata/rules/
+        // Sau đó đếm số dòng có chứa "sid" hoặc "SID"
+        const command = `
+            find /etc/suricata/rules/ -type f -name "*.rules" | 
+            xargs grep -E "sid|SID" | 
+            wc -l
+        `;
+
+        // Thực thi lệnh trên thiết bị từ xa
+        const count = await executeCommand(address, 'root', pass, command.trim());
+
+        // Trả kết quả về client
+        res.json({ count: parseInt(count.trim(), 10) }); // Chuyển chuỗi kết quả thành số nguyên
+    } catch (error) {
+        console.error('Error executing command:', error.message);
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+
+//=============================================================================================================================//
+// Route để lấy số thông số RAM
+app.get('/api/system/ram',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        const count = await executeCommand(address, 'root', pass, "free -h | awk '/Mem:/ {print $3 \"/\" $2}'");
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Route để lấy số thông số 
+app.get('/api/system/cpu',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        // Tạo độ trễ 1.5 giây trước khi thực thi lệnh
+        setTimeout(async () => {
+            // Thực thi lệnh để lấy thông tin CPU
+            const usecpu = await executeCommand(address, 'root', pass, "top -bn1 | grep 'Cpu(s)' | sed \"s/%Cpu(s):/ /\" | awk '{print 100 - $7}'");
+            
+            // Trả về kết quả cho client
+            res.json({ usecpu });
+
+        }, 800); // 1500 milliseconds = 1.5 seconds
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Route để lấy số thông số o cung ghi log
+app.get('/api/system/logdisk',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        const count = await executeCommand(address, 'root', pass, `df -h | awk '$NF=="/mnt/my_storage" {print $3"/"$2}'`);
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+// Đường dẫn tới file log
+const logFilePath = '/var/log/firewall_requests.json';
+const userLogFilePath = '/var/log/user_pass.json';
+
+// Bộ nhớ tạm thời lưu request từ firewall
+let firewallRequests = [];
+let userLoginRequests = [];
+
+// 🔥 Hàm ghi log vào file 🔥
+function appendToFirewallLog(entry) {
+    let logs = [];
+    if (fs.existsSync(logFilePath)) {
+        const fileContent = fs.readFileSync(logFilePath, 'utf8');
+        try {
+            logs = JSON.parse(fileContent);
+        } catch (error) {
+            console.error("Error parsing firewall log file:", error);
+        }
+    }
+    logs.unshift(entry);
+    if (logs.length > 500) {
+        logs.pop();
+    }
+    fs.writeFileSync(logFilePath, JSON.stringify(logs, null, 2));
+}
+
+function appendToUserLog(entry) {
+    let logs = [];
+    if (fs.existsSync(userLogFilePath)) {
+        const fileContent = fs.readFileSync(userLogFilePath, 'utf8');
+        try {
+            logs = JSON.parse(fileContent);
+        } catch (error) {
+            console.error("Error parsing user login log file:", error);
+        }
+    }
+    logs.unshift(entry);
+    if (logs.length > 500) {
+        logs.pop();
+    }
+    fs.writeFileSync(userLogFilePath, JSON.stringify(logs, null, 2));
+}
+
+// 🔥 API nhận dữ liệu từ firewall (mac log) 🔥
+// 🔥 API nhận dữ liệu từ firewall (mac log) 🔥
+// 🔥 API nhận dữ liệu từ firewall (mac log) 🔥
+app.post('/api/firewall/logs/mac', (req, res) => {
+    const { mac, status, name, ip, reason } = req.body;  // Nhận thêm "reason"
+    const timestamp = new Date().toISOString();
+
+    console.log(`[INFO] Update from Firewall: MAC=${mac}, Status=${status}, Name=${name}, IP=${ip}, Reason=${reason}`);
+
+    const newRequest = { mac, status, name, ip, reason, timestamp }; // Thêm "reason" vào request
+    firewallRequests.unshift(newRequest);
+    appendToFirewallLog(newRequest);  // Lưu vào log
+
+    res.json({ message: 'Update received and logged', mac, status, name, ip, reason });
+});
+
+
+
+// 🔥 API nhận dữ liệu từ firewall (user log) 🔥
+app.post('/api/firewall/logs/username', (req, res) => {
+    const { username, ip, status, reason } = req.body;
+    const timestamp = new Date().toISOString();
+
+    console.log(`[INFO] Update from Firewall: Username=${username}, IP=${ip}, Status=${status}, Reason=${reason}`);
+
+    const newRequest = { timestamp, username, ip, status, reason };
+    userLoginRequests.unshift(newRequest);
+    appendToUserLog(newRequest);
+
+    res.json({ message: 'Update received and logged', username, ip, status, reason });
+});
+
+// 🔥 API lấy request mới nhất (mac log) 🔥
+app.get('/api/firewall/logs/mac', (req, res) => {
+    res.json({ message: "Live firewall MAC logs", logs: firewallRequests });
+});
+
+// 🔥 API lấy request mới nhất (user log) 🔥
+app.get('/api/firewall/logs/username', (req, res) => {
+    res.json({ message: "Live user login logs", logs: userLoginRequests });
+});
+
+// 🔥 API lấy số request chưa đọc (mac log) 🔥
+app.get('/api/firewall/new-requests/mac', (req, res) => {
+    res.json({ count: firewallRequests.length });
+});
+
+// 🔥 API lấy số request chưa đọc (user log) 🔥
+app.get('/api/firewall/new-requests/username', (req, res) => {
+    res.json({ count: userLoginRequests.length });
+});
+
+// 🔥 API reset request sau khi mở popup (mac log) 🔥
+app.post('/api/firewall/reset-requests/mac', (req, res) => {
+    firewallRequests = [];
+    res.json({ message: "MAC Requests reset successfully" });
+});
+
+// 🔥 API reset request sau khi mở popup (user log) 🔥
+app.post('/api/firewall/reset-requests/username', (req, res) => {
+    userLoginRequests = [];
+    res.json({ message: "User Login Requests reset successfully" });
+});
+
+// 🔥 API đọc toàn bộ log từ file (mac log) 🔥
+app.get('/api/firewall/full-log/mac', (req, res) => {
+    if (!fs.existsSync(logFilePath)) {
+        return res.json({ logs: [] });
+    }
+
+    try {
+        const data = fs.readFileSync(logFilePath, 'utf8');
+        const logs = JSON.parse(data);
+        res.json({ logs });
+    } catch (error) {
+        res.status(500).json({ message: "Error reading log file", error: error.message });
+    }
+});
+
+// 🔥 API đọc toàn bộ log từ file (user log) 🔥
+app.get('/api/firewall/full-log/username', (req, res) => {
+    if (!fs.existsSync(userLogFilePath)) {
+        return res.json({ logs: [] });
+    }
+
+    try {
+        const data = fs.readFileSync(userLogFilePath, 'utf8');
+        const logs = JSON.parse(data);
+        res.json({ logs });
+    } catch (error) {
+        res.status(500).json({ message: "Error reading user login log file", error: error.message });
+    }
+});
+
+
+
+
+
+//=============================================================================================================================//
+// Route để lấy số thông số thoi gian thiet bi hoat dong ke tu lan cuoi
+app.get('/api/system/checkTimehoatdong',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        const count = await executeCommand(address, 'root', pass, `uptime | awk -F'( up |, 1 user|,  [0-9] user|, load average)' '{print $2}'`);
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+
+//=============================================================================================================================//
+// Route để lấy số thông số nhiet do CPU
+app.get('/api/system/tempCPU',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        // Thực thi lệnh để lấy nhiệt độ CPU
+        const output = await executeCommand(address, 'root', pass, `sensors | awk '/temp1:/ {print $2 $3} /temp2:/ {print $2 $3}'`);
+
+        // Tách kết quả thành mảng
+        const temps = output.trim().split('\n');
+
+        // Tạo JSON với chỉ nhiệt độ
+        const result = {
+            core1: temps[0] || 'N/A', // Nhiệt độ Core 1
+            core2: temps[1] || 'N/A'  // Nhiệt độ Core 2
+        };
+
+        res.json(result); // Trả về JSON
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Route để lấy số thông số nhiet do CPU
+app.get('/api/system/hanlicense',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        const count = await executeCommand(address, 'root', pass, 'cat /etc/suricata/license');
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+
+
+
+//============================================================================================================================//
+// Hàm escape các ký tự đặc biệt trong từ khóa cho grep
+function escapeKeywordForGrep(keyword) {
+    return keyword.replace(/([\\\[\]\*\?\$\^\{\}\|])/g, '\\$&');
+}
+
+// Route để tìm kiếm rule trong các file rules
+app.post('/api/rules/timvasua',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+    let keyword = req.body.keyword.trim(); // Lấy từ khóa từ request
+
+    if (!keyword) {
+        return res.status(400).json({ message: 'Keyword is required' });
+    }
+
+    // Escape từ khóa để tránh các ký tự đặc biệt gây lỗi
+    keyword = escapeKeywordForGrep(keyword);
+
+    try {
+        // Sử dụng lệnh grep để tìm từ khóa trong các file có đuôi .rules
+        const command = `grep -rnw '/etc/suricata/rules' -e '${keyword}' --include=*.rules`;
+        console.log(`Đang chạy lệnh: ${command}`); // Log lệnh grep để kiểm tra
+        const searchResult = await executeCommand(address, 'root', pass, command);
+
+        if (!searchResult) {
+            return res.json({ message: 'No matching rules found' });
+        }
+
+        // Phân tích kết quả grep để trả về file, dòng và nội dung
+        const results = searchResult.split('\n').filter(line => line).map(line => {
+            const [file, lineNumber, ...content] = line.split(':');
+            return {
+                file,
+                line: parseInt(lineNumber, 10),
+                content: content.join(':').trim()
+            };
+        });
+
+        res.json({ results });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+
+
+//============================================================================================================================//
+// Route để sua rule
+//============================================================================================================================//
+// Route để sửa rule
+// Route để sửa rule và kiểm tra
+app.post('/api/rules/update',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+    const { file, sid, newAction, newProtocol, newSource, newSourcePort, newDestination, newDestinationPort } = req.body;
+
+    console.log('Received data:', { file, sid, newAction, newProtocol, newSource, newSourcePort, newDestination, newDestinationPort });
+
+    if (!file || !sid || !newAction || !newProtocol || !newSource || !newSourcePort || !newDestination || !newDestinationPort) {
+        return res.status(400).json({ message: 'File, SID, and all new fields are required' });
+    }
+
+    try {
+        const getLineCommand = `grep 'sid:\\s*${sid};' ${file}`;
+        const originalLine = await executeCommand(address, 'root', pass, getLineCommand);
+
+        console.log('Grep result:', originalLine);
+        if (!originalLine) {
+            return res.status(404).json({ message: 'Rule not found' });
+        }
+
+        // Phân tích dòng quy tắc gốc
+        let [action, protocol, source, sourcePort, direction, destination, destinationPort, ...rest] = originalLine.split(' ');
+
+        // Tăng giá trị rev nếu có
+        const revRegex = /rev:\s*(\d+);/;
+        let updatedRest = rest.join(' ');
+        const revMatch = updatedRest.match(revRegex);
+
+        if (revMatch) {
+            const currentRev = parseInt(revMatch[1], 10); // Lấy giá trị rev hiện tại
+            const newRev = currentRev + 1; // Tăng rev lên 1
+            updatedRest = updatedRest.replace(revRegex, `rev:${newRev};`); // Thay thế giá trị rev
+        } else {
+            return res.status(400).json({ message: 'Missing rev parameter in rule' });
+        }
+
+        // Cập nhật chỉ những phần đã thay đổi
+        action = newAction.startsWith('#') ? newAction : newAction;
+        protocol = newProtocol;
+        source = newSource;
+        sourcePort = newSourcePort;
+        destination = newDestination;
+        destinationPort = newDestinationPort;
+
+        const updatedLine = `${action} ${protocol} ${source} ${sourcePort} ${direction} ${destination} ${destinationPort} ${updatedRest}`;
+        const escapedUpdatedLine = updatedLine.replace(/(["`\\])/g, '\\$1');
+
+        const updateCommand = `sed -i '/sid:\\s*${sid};/c\\${escapedUpdatedLine}' ${file}`;
+        await executeCommand(address, 'root', pass, updateCommand);
+
+        // Kiểm tra và tạo file tạm nếu chưa tồn tại
+        const tempFilePath = '/tmp/rulesua.rules';
+        // const createTempFileCommand = `touch ${tempFilePath}`;
+        // await executeCommand(address, 'root', pass, createTempFileCommand);
+
+        // Ghi rule đã sửa vào file tạm
+        // console.log("duyet beo", updatedLine);
+        // Ghi nội dung rule vào file tạm bằng cách sử dụng echo và > (ghi đè)
+        const saveTempRuleCommand = `echo '${updatedLine}' > ${tempFilePath}`;
+        await executeCommand(address, 'root', pass, saveTempRuleCommand);
+        
+        // Kiểm tra xem file tạm đã ghi thành công hay chưa
+        const checkTempFileCommand = `cat ${tempFilePath}`;
+        const checkTempFileOutput = await executeCommand(address, 'root', pass, checkTempFileCommand);
+        console.log('Temporary rule file content:', checkTempFileOutput);
+
+
+        // Chạy script kiểm tra rule trên file tạm
+        const checkTempRuleCommand = `/usr/local/etc/chowebApp/kiemtrarule.sh ${tempFilePath}`;
+        const checkResult = await executeCommand(address, 'root', pass, checkTempRuleCommand);
+
+        // Kiểm tra kết quả từ script
+        if (checkResult.includes('Tổng số rule sai: 0')) {
+            // Nếu không có lỗi, restart Suricata
+            const restartCommand = `/usr/local/etc/chowebApp/restart_suricata.sh`;
+            await executeCommand(address, 'root', pass, restartCommand);
+
+            // Xóa file tạm sau khi kiểm tra
+            // const deleteTempFileCommand = `rm -f ${tempFilePath}`;
+            // await executeCommand(address, 'root', pass, deleteTempFileCommand);
+
+            return res.json({ message: 'Sửa rule thành công' });
+        } else {
+            // Phân tích lỗi từ kết quả script
+            const errorLines = checkResult.split('\n').filter(line => line.includes('Tổng số rule sai') || line.includes('Nội dung rule đầy đủ') || line.includes('Vị trí:'));
+            
+            return res.status(400).json({
+                message: 'Có lỗi trong rule',
+                errors: errorLines.join('\n')
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating rule', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Route để lấy số thông số HA
+app.get('/api/system/ha', async (req, res) => {
+    const { address, pass } = req.session.sshInfo || {};
+
+    if (!address || !pass) {
+        return res.status(400).json({ message: 'Missing SSH credentials' });
+    }
+
+    try {
+        // Thực hiện lệnh để lấy trạng thái
+        const result = await executeCommand(address, 'root', pass, "for iface in fm2-mac2 fm2-mac1; do ip addr show $iface | grep 192.168.2.196; done");
+
+        // Kiểm tra xem có kết quả trả về không
+        const status = result.trim() ? 'Active' : 'Deactive'; // Nếu có kết quả trả về thì status là 'on', ngược lại là 'off'
+
+        res.json({ status }); // Trả về trạng thái
+    } catch (error) {
+        console.error('Error executing command:', error); // Log lỗi nếu có
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Route để tìm kiếm rules với gợi ý
+app.post('/api/rules/search',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+    const keyword = req.body.keyword.toLowerCase();
+
+    try {
+        const command = 'ls /etc/suricata/rules';
+        const result = await executeCommand(address, 'root', pass, command);
+        const files = result.split('\n').filter(file => file.toLowerCase().includes(keyword));
+        res.json({ files });
+    } catch (error) {
+        res.status(500).json({ message: 'Error searching rules', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Route để thực thi lệnh cat khi người dùng chọn một rule
+app.post('/api/rules/execute',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+    const filename = req.body.filename;
+
+    try {
+        // Lệnh cat để sao chép nội dung file rule vào /tmp/xemrule.rules
+        const command = `cat /etc/suricata/rules/${filename} > /tmp/xemrule.rules`;
+        await executeCommand(address, 'root', pass, command);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Đường dẫn tới file xemrule.rules trong thư mục /tmp
+const remoteFilePath = '/tmp/xemrule.rules';
+
+
+function parseRulesFile(fileContent) {
+    const lines = fileContent.split('\n');
+    const rules = [];
+
+    lines.forEach(line => {
+        // Bỏ qua dòng trống
+        if (line.trim() === '') return;
+
+        const rule = {};
+
+        // 1. Trích xuất Action (Chỉ lấy nếu action là #alert, #drop, #reject, #pass hoặc alert, drop, reject, pass)
+        const actionMatch = line.match(/^(#?(alert|drop|reject|pass))/);  // Lấy action với hoặc không có dấu #
+        if (!actionMatch) return;  // Nếu không phù hợp, bỏ qua dòng này
+        rule.action = actionMatch[0];  // Giữ nguyên giá trị đầy đủ của action, kể cả dấu #
+
+        // 2. Trích xuất SID
+        const sidMatch = line.match(/sid:\s*(\d+)\s*;/);  // Thêm khoảng trắng linh hoạt trước và sau dấu ':'
+        rule.sid = sidMatch ? sidMatch[1] : 'Unknown';
+
+        // 3. Trích xuất MSG
+        const msgMatch = line.match(/msg:\s*"([^"]*)"\s*;/);  // Chỉ lấy phần chữ nằm giữa dấu ngoặc kép ""
+        rule.msg = msgMatch ? msgMatch[1] : 'Unknown';
+        
+
+        // 4. Trích xuất Protocol
+        const parts = line.split(/\s+/);  // Tách dòng thành các phần dựa trên khoảng trắng
+        rule.protocol = parts[1] || 'Unknown';  // Lấy trường thứ 2 là protocol
+
+        // 5. Trường Source và Destination giữ nguyên
+        rule.src = parts[2] + ' ' + parts[3];  // Trường thứ 3 và 4 là Source (VD: $EXTERNAL_NET any)
+        rule.dst = parts[5] + ' ' + parts[6];  // Trường thứ 6 và 7 là Destination (VD: $HOME_NET any)
+
+        // 6. Trích xuất Severity chỉ từ signature_severity
+        const severityMatch = line.match(/signature_severity\s*(\S+)\s*;/);  // Tìm "signature_severity" và trích xuất text
+        rule.severity = severityMatch ? severityMatch[1] : 'Unknown';
+
+        // Thêm quy tắc vào mảng rules
+        rules.push(rule);
+    });
+
+    return rules;
+}
+
+// Hàm đọc nội dung từ file remote
+function readRemoteFile(address, username, password, remoteFilePath) {
+    return new Promise((resolve, reject) => {
+        const conn = new Client();
+        let fileContent = '';
+
+        conn.on('ready', () => {
+            conn.exec(`cat ${remoteFilePath}`, (err, stream) => {
+                if (err) {
+                    reject(err);
+                    conn.end();
+                    return;
+                }
+
+                stream.on('data', (data) => {
+                    fileContent += data.toString();
+                }).on('close', () => {
+                    resolve(fileContent);
+                    conn.end();
+                });
+            });
+        }).connect({
+            host: address,
+            port: 22,
+            username: username,
+            password: password,
+        });
+    });
+}
+
+//============================================================================================================================//
+// Route để trả về dữ liệu rule đã được parse
+app.get('/api/rules',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+
+    try {
+        const fileContent = await readRemoteFile(address, 'root', pass, remoteFilePath);
+        const rulesData = parseRulesFile(fileContent);
+        res.json(rulesData); // Trả về dữ liệu JSON
+    } catch (error) {
+        res.status(500).json({ message: 'Error reading file', error: error.message });
+    }
+});
+//========================================================//
+// Route để lấy chi tiết rule dựa trên SID
+// Route để lấy chi tiết rule dựa trên SID
+app.get('/api/rule/:sid',  async (req, res) => {
+    const { sid } = req.params;
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session (địa chỉ và mật khẩu thiết bị IPS)
+
+    try {
+        // Chạy lệnh trên thiết bị IPS để tìm rule dựa trên SID, với khoảng trắng linh hoạt
+        const command = `cat ${remoteFilePath} | grep -E 'sid\\s*:\\s*${sid}\\s*;'`;
+
+        console.log(`Đang chạy lệnh: ${command}`);
+
+        const ruleData = await executeCommand(address, 'root', pass, command);
+
+        if (ruleData) {
+
+            // Sử dụng hàm parseRule để phân tích cú pháp ruleData
+            const parsedRule = parseRule(ruleData);
+
+            if (parsedRule) {
+                res.json({
+                    sid: parsedRule.sid,
+                    msg: parsedRule.msg,
+                    action: parsedRule.action,
+                    protocol: parsedRule.protocol,
+                    src: parsedRule.src,
+                    dst: parsedRule.dst,
+                    severity: parsedRule.severity,
+                    fullRule: ruleData // Toàn bộ rule được trả về nguyên bản
+                });
+            } else {
+                res.status(400).json({ message: 'Invalid rule format' });
+            }
+        } else {
+            res.status(404).json({ message: 'Rule not found' });
+        }
+    } catch (error) {
+        console.error('Lỗi khi thực thi lệnh trên IPS:', error);
+        res.status(500).json({ message: 'Lỗi khi lấy dữ liệu rule', error: error.message });
+    }
+
+});
+
+// Hàm tiền xử lý để chuẩn hóa cú pháp của SID
+function preprocessRule(ruleString) {
+    // Tìm tất cả các trường hợp có từ 'sid' bao bọc bởi dấu ';' nhưng không theo định dạng chuẩn
+    const sidPattern = /;\s*(sid)\s*:\s*(\d+)\s*;/g;
+
+    // Sửa tất cả các trường hợp thành dạng chuẩn "sid:<số sid>;"
+    const fixedRuleString = ruleString.replace(sidPattern, '; sid:$2;');
+
+    // In ra rule sau khi đã sửa
+    console.log("Rule sau khi sửa định dạng SID:", fixedRuleString);
+
+    return fixedRuleString;
+}
+
+// Hàm phân tích cú pháp rule từ chuỗi rule
+function parseRule(ruleString) {
+    try {
+        // Tìm vị trí dấu ngoặc đơn đầu tiên
+        const openingParenIndex = ruleString.indexOf('(');
+
+        if (openingParenIndex === -1) {
+            throw new Error('Rule không hợp lệ, thiếu phần nội dung trong ngoặc đơn');
+        }
+
+        // Tách actionPart và optionsPart
+        const actionPart = ruleString.slice(0, openingParenIndex).trim();
+        const optionsPart = ruleString.slice(openingParenIndex).trim();
+
+        const actionParts = actionPart.split(/\s+/);
+        const action = actionParts[0];
+
+        // Kiểm tra action để đảm bảo chỉ lấy các action hợp lệ
+        if (!['#alert', '#drop', '#reject', '#pass', 'alert', 'drop', 'reject', 'pass'].includes(action)) {
+            return null; // Bỏ qua nếu không phải action hợp lệ
+        }
+
+        // Dùng regex để tìm và sửa tất cả các trường hợp SID trong rule
+        let ruleStringModified = ruleString.replace(/sid\s*:\s*(\d+)\s*;/g, 'sid:$1;');
+        console.log('Rule sau khi sửa định dạng SID:', ruleStringModified);
+
+        const sidMatch = ruleStringModified.match(/sid:\s*(\d+)\s*;/); // Trích xuất SID sau khi sửa định dạng
+        const msgMatch = optionsPart.match(/msg:\s*"([^"]*)"\s*;/);  // Trích xuất MSG, bao gồm cả dấu ngoặc đơn
+        const severityMatch = optionsPart.match(/signature_severity\s*(\S+)\s*;/); // Trích xuất signature_severity nếu có
+
+        // Log để kiểm tra phần MSG
+        // console.log('Chuỗi optionsPart:', optionsPart);  // Debug chuỗi options
+        // console.log('Kết quả của phép match SID:', sidMatch ? sidMatch[1] : 'Không tìm thấy SID');
+        // console.log('Kết quả của phép match MSG:', msgMatch ? msgMatch[1] : 'Không tìm thấy MSG');
+
+        return {
+            sid: sidMatch ? sidMatch[1] : 'Unknown', // Trích xuất SID, lấy giá trị nếu có
+            msg: msgMatch ? msgMatch[1] : 'Unknown', // Trích xuất MSG, bỏ dấu ngoặc kép
+            action: action || 'Unknown', // Trích xuất action
+            protocol: actionParts[1] || 'Unknown', // Trường thứ 2 là Protocol
+            src: actionParts[2] + ' ' + actionParts[3] || 'Unknown', // Trích xuất Source
+            dst: actionParts[5] + ' ' + actionParts[6] || 'Unknown', // Trích xuất Destination
+            severity: severityMatch ? severityMatch[1] : 'Unknown' // Trích xuất Severity từ signature_severity
+        };
+    } catch (error) {
+        console.error('Error parsing rule:', error.message);
+        throw new Error('Lỗi khi phân tích cú pháp rule');
+    }
+}
+
+//============================================================================================================================//
+// Route để lấy thông tin lần cập nhật rules cuối cùng 
+app.get('/api/rules/lastUpdate',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        const count = await executeCommand(address, 'root', pass, 'stat -c %y /etc/suricata/all_rules.rules | cut -d" " -f1');
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//============================================================================================================================//
+// Route để lấy phiên bản cục bộ
+app.get('/api/rules/localVersion',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+
+    try {
+        let version = await executeCommand(address, 'root', pass, 'cat /etc/suricata/rules/version.txt');
+        version = version.trim(); // Loại bỏ khoảng trắng dư thừa
+        if (version.startsWith('#version:')) {
+            version = version.replace('#version:', ''); // Loại bỏ tiền tố '#version:'
+        }
+        res.json({ version });
+    } catch (error) {
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+
+
+//============================================================================================================================//
+// Route để trả về danh sách các file rule
+app.get('/api/rules/list',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin từ session
+
+    try {
+        const command = 'ls /etc/suricata/rules'; // Lệnh để lấy danh sách file
+        const result = await executeCommand(address, 'root', pass, command); // Thực thi lệnh
+        const files = result.split('\n').filter(file => file.trim() !== ''); // Lọc bỏ dòng trống
+        res.json({ files }); // Trả về danh sách file dưới dạng JSON
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching rule list', error: error.message });
+    }
+});
+
+//=============================================================================================================================//
+// Route để tải nội dung file /etc/suricata/suricata.yaml
+//============================================================================================================================//
+// Route để lấy nội dung file
+app.get('/api/file/:fileName',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+    const { fileName } = req.params;
+    
+    const fileMap = {
+        suricata: '/etc/suricata/suricata.yaml',
+        classification: '/etc/suricata/classification.config',
+        threshold: '/etc/suricata/threshold.config',
+        filebeat: '/etc/filebeat/filebeat.yaml'
+    };
+
+    const filePath = fileMap[fileName]; // Lấy đường dẫn của file tương ứng
+
+    if (!filePath) {
+        return res.status(404).json({ message: 'File không tồn tại' });
+    }
+
+    try {
+        // Lệnh để lấy nội dung file
+        const command = `cat ${filePath}`;
+        const content = await executeCommand(address, 'root', pass, command); // Thực thi lệnh cat
+        res.send(content); // Trả về nội dung file
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy nội dung file', error: error.message });
+    }
+});
+
+//============================================================================================================================//
+//============================================================================================================================//
+// Route để lưu nội dung file
+app.post('/api/file/:fileName',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+    const { fileName } = req.params;
+    const { content } = req.body; // Lấy nội dung từ body request
+
+    const fileMap = {
+        suricata: '/etc/suricata/suricata.yaml',
+        classification: '/etc/suricata/classification.config',
+        threshold: '/etc/suricata/threshold.config',
+        filebeat: '/etc/filebeat/filebeat.yml'
+    };
+
+    const filePath = fileMap[fileName]; // Lấy đường dẫn file
+
+    if (!filePath) {
+        return res.status(404).json({ message: 'File không tồn tại' });
+    }
+
+    try {
+        // Lệnh để ghi nội dung mới vào file
+        const command = `echo '${content.replace(/'/g, "'\\''")}' > ${filePath}`;
+        await executeCommand(address, 'root', pass, command); // Thực thi lệnh echo để ghi file
+
+        // Thực thi script reload Suricata sau khi ghi file
+        const reloadCommand = '/usr/local/etc/chowebApp/restart_suricata.sh';
+        const reloadResult = await executeCommand(address, 'root', pass, reloadCommand); // Chạy script reload Suricata
+
+        if (reloadResult.includes('<Error>')) {
+            // Nếu có lỗi, trả về toàn bộ thông báo lỗi
+            const errors = reloadResult.split('\n').filter(line => line.includes('<Error>'));
+            return res.json({ success: false, errors });
+        }
+
+        res.json({ success: true, message: 'Lưu file và reload dịch vụ Suricata thành công' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lưu file hoặc reload Suricata', error: error.message });
+    }
+});
+
+//============================================================================================================================//
+// Route để lấy nội dung file từ thiết bị từ xa
+app.get('/api/rules/file/:fileName',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+    const { fileName } = req.params;
+
+    try {
+        // Xác thực tên file hợp lệ
+        if (!fileName.endsWith('.rules')) {
+            return res.status(400).json({ message: 'Tên file không hợp lệ' });
+        }
+
+        // Thực thi lệnh SSH để đọc nội dung file
+        const command = `cat /etc/suricata/rules/${fileName}`;
+        const fileContent = await executeCommand(address, 'root', pass, command);
+
+        // Trả về nội dung file
+        res.json({ success: true, content: fileContent });
+    } catch (error) {
+        console.error('Error fetching file content:', error);
+        res.status(500).json({ message: 'Không thể lấy nội dung file', error: error.message });
+    }
+});
+
+// Route để lưu nội dung chỉnh sửa file
+// Route để lưu nội dung chỉnh sửa file
+
+app.post('/api/rules/file/:fileName',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+    const { fileName } = req.params;
+    const { changes, fullFileContent } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!changes || changes.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'Không có thay đổi nào để lưu',
+        });
+    }
+
+    if (!fullFileContent || typeof fullFileContent !== 'string') {
+        return res.status(400).json({
+            success: false,
+            message: 'Dữ liệu toàn bộ file không hợp lệ',
+        });
+    }
+
+    try {
+        const tempFilePath = '/tmp/fixrules.rules';
+        const fullTempFilePath = '/tmp/fullrules.rules';
+        const tempContent = changes.map(change => change.content).join("\n");
+
+        // Ghi chỉ những dòng thay đổi vào file tạm
+        const saveTempRuleCommand = `echo '${tempContent.replace(/'/g, "'\\''")}' > ${tempFilePath}`;
+        await executeCommand(address, 'root', pass, saveTempRuleCommand);
+
+        // Ghi toàn bộ nội dung file mới vào file tạm chứa toàn bộ nội dung
+        const saveFullRuleCommand = `echo '${fullFileContent.replace(/'/g, "'\\''")}' > ${fullTempFilePath}`;
+        await executeCommand(address, 'root', pass, saveFullRuleCommand);
+
+        // Kiểm tra file tạm với script kiểm tra rules
+        const checkTempRuleCommand = `/usr/local/etc/chowebApp/kiemtrarule.sh ${tempFilePath}`;
+        const checkResult = await executeCommand(address, 'root', pass, checkTempRuleCommand);
+
+        if (checkResult.includes('Tổng số rule sai: 0')) {
+            console.log('[INFO] Kiểm tra thành công, chuẩn bị ghi đè file gốc.');
+
+            // Di chuyển file tạm chứa toàn bộ nội dung thành file gốc
+            const originalFilePath = `/etc/suricata/rules/${fileName}`;
+            const moveFullRuleCommand = `mv ${fullTempFilePath} ${originalFilePath}`;
+            await executeCommand(address, 'root', pass, moveFullRuleCommand);
+
+            // Khởi động lại dịch vụ
+            const restartCommand = `/usr/local/etc/chowebApp/restart_suricata.sh`;
+            await executeCommand(address, 'root', pass, restartCommand);
+
+            return res.json({
+                success: true,
+                message: 'Sửa rule thành công',
+            });
+        } else {
+            const errorLines = checkResult.split('\n').filter(line => 
+                line.includes('Tổng số rule sai') || 
+                line.includes('Nội dung rule đầy đủ') || 
+                line.includes('Vị trí:')
+            );
+            return res.status(400).json({
+                success: false,
+                message: 'Có lỗi trong rule',
+                errors: errorLines,
+            });
+        }
+    } catch (error) {
+        console.error('[ERROR] Error updating rule:', error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi khi lưu file hoặc reload Suricata',
+            error: error.message,
+        });
+    }
+});
+
+
+
+//============================================================================================================================//
+// Route để kiểm tra cập nhật rule từ URL so với tệp cục bộ
+app.post('/api/check-update',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+    const { feedUrl } = req.body;
+
+    try {
+        // Lấy tên tệp từ feedUrl để tạo đường dẫn localFilePath động
+        const fileName = require('path').basename(feedUrl); // Lấy tên file từ URL, ví dụ "trafficid.rules"
+        const localFilePath = `/etc/suricata/rules/${fileName}`; // Tạo đường dẫn localFilePath
+
+        console.log(`So sánh tệp local: ${localFilePath} với feedUrl: ${feedUrl}`);
+
+        const localFileContent = await executeCommand(address, 'root', pass, `cat ${localFilePath}`);
+
+
+
+
+
+
+
+        const response = await fetch(feedUrl);
+        if (!response.ok) {
+            throw new Error(`Không thể tải nội dung từ feedUrl: ${response.statusText}`);
+        }
+        const remoteFileContent = await response.text();
+
+        // Tính giá trị băm của nội dung local và remote
+        const localHash = crypto.createHash('sha256').update(localFileContent).digest('hex');
+        const remoteHash = crypto.createHash('sha256').update(remoteFileContent).digest('hex');
+
+        if (localHash === remoteHash) {
+            // Nếu giá trị băm giống nhau, không cần so sánh chi tiết
+            return res.json({ updateAvailable: false });
+        }
+
+        const localLines = localFileContent.split('\n').filter(line => line.includes('sid'));
+        const remoteLines = remoteFileContent.split('\n').filter(line => line.includes('sid'));
+        const localSids = {};
+        const differences = {
+            newRules: [],
+            modifiedRules: []
+        };
+
+        // Tạo một đối tượng để lưu các sid từ file local
+        localLines.forEach(line => {
+            const sidMatch = line.match(/sid:\s*(\d+)/);
+            if (sidMatch) {
+                localSids[sidMatch[1]] = line.trim();
+            }
+        });
+
+        // So sánh các dòng từ remote
+        remoteLines.forEach(line => {
+            const sidMatch = line.match(/sid:\s*(\d+)/);
+            if (sidMatch) {
+                const remoteSid = sidMatch[1];
+                const remoteLine = line.trim();
+
+                if (!localSids[remoteSid]) {
+                    // Dòng có "sid" trên remote nhưng không có trên local -> Rule mới
+                    differences.newRules.push({
+                        sid: remoteSid,
+                        remote: remoteLine
+                    });
+                } else if (localSids[remoteSid] !== remoteLine) {
+                    // Nếu "sid" tồn tại trong cả hai file nhưng khác nhau
+                    const localLine = localSids[remoteSid];
+                    const localParts = localLine.split(/\s+/);
+                    const remoteParts = remoteLine.split(/\s+/);
+                    const diffParts = [];
+
+                    localParts.forEach((part, index) => {
+                        if (part !== remoteParts[index]) {
+                            diffParts.push(`<span class=\"highlight\">${remoteParts[index]}</span>`);
+                        } else {
+                            diffParts.push(part);
+                        }
+                    });
+
+                    differences.modifiedRules.push({
+                        sid: remoteSid,
+                        local: localLine,
+                        remote: diffParts.join(' ')
+                    });
+                }
+
+                // Xóa sid đã xử lý để không so sánh lại
+                delete localSids[remoteSid];
+            }
+        });
+
+        // Kiểm tra nếu còn các dòng "sid" trong local mà không có trong remote (nếu cần thiết)
+        Object.keys(localSids).forEach(sid => {
+            differences.modifiedRules.push({
+                sid: sid,
+                local: localSids[sid],
+                remote: 'Không tồn tại trong tệp từ URL'
+            });
+        });
+
+        if (differences.newRules.length === 0 && differences.modifiedRules.length === 0) {
+            res.json({ updateAvailable: false });
+        } else {
+            res.json({ updateAvailable: true, differences });
+        }
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra cập nhật:', error);
+        res.status(500).json({ message: 'Lỗi khi kiểm tra cập nhật', error: error.message });
+    }
+});
+
+
+
+
+//============================================================================================================================//
+// Route để tải file từ feedUrl về máy host
+
+// API tải file
+// API tải file
+app.post('/api/tairule', async (req, res) => {
+    const { url } = req.body; // URL được gửi từ client
+  
+    if (!url) {
+      return res.status(400).json({ error: 'URL không hợp lệ!' });
+    }
+  
+    try {
+      // Tách tên file từ URL
+      const fileName = url.split('/').pop();
+  
+      // Gửi request tải file từ URL
+      const response = await axios({
+        method: 'get',
+        url: url,
+        responseType: 'stream',
+      });
+  
+      // Gắn header Content-Type từ response của axios
+      const contentType = response.headers['content-type'] || 'application/octet-stream';
+      res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+      res.setHeader('Content-Type', contentType);
+  
+      // Truyền dữ liệu từ stream của axios đến response
+      response.data.pipe(res);
+    } catch (error) {
+      console.error('Lỗi tải file:', error.message);
+      res.status(500).json({ error: 'Không thể tải file!' });
+    }
+  });
+  
+// Route để tải file từ feedUrl và gửi về trình duyệt
+// Route để tải tất cả các bản cập nhật
+// Route tải file từ feedUrl và gửi về trình duyệt
+// Danh sách các URL cho các bản cập nhật
+// Danh sách các URL cho các bản cập nhật
+const downloadUrls = {
+    downloadUpdate1: "https://rules.emergingthreats.net/open/old/suricata-4.0/emerging.rules.tar.gz",
+    downloadUpdate2: "https://rules.ptsecurity.com/files/ptopen.rules.tar.gz",
+    downloadUpdate3: "https://example.com/some-other-file.rules",
+    // Bạn có thể thêm nhiều URL ở đây cho các trường hợp khác
+};
+
+// Route tải file từ feedUrl và gửi về trình duyệt
+app.post('/api/download-update', async (req, res) => {
+    const { updateKey } = req.body; // Nhận key cho bản cập nhật (ví dụ: downloadUpdate1, downloadUpdate2)
+
+    // Kiểm tra nếu updateKey không hợp lệ
+    if (!downloadUrls[updateKey]) {
+        return res.status(400).send('Invalid update key');
+    }
+
+    const feedUrl = downloadUrls[updateKey]; // Lấy URL từ danh sách
+    try {
+        const response = await fetch(feedUrl);
+        if (!response.ok) {
+            throw new Error(`Không thể tải file từ URL: ${response.statusText}`);
+        }
+
+        const fileContent = await response.buffer(); // Sử dụng buffer để tải file nhị phân
+
+        // Trích xuất tên file từ URL
+        const fileName = path.basename(feedUrl); // Lấy phần tên file từ URL (ví dụ: "emerging.rules.tar.gz")
+
+        // Trả file về trình duyệt với header tải xuống
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.setHeader('Content-Type', 'application/octet-stream'); // Loại MIME phù hợp cho file nhị phân
+        res.send(fileContent); // Gửi nội dung file về phía client
+    } catch (error) {
+        console.error('Lỗi khi tải file về trình duyệt:', error);
+        res.status(500).json({ message: 'Lỗi khi tải file về', error: error.message });
+    }
+});
+
+
+
+
+
+
+
+function parseRules(content) {
+    const lines = content.split('\n').filter(line => line.trim());
+    const rules = {};
+
+    lines.forEach(line => {
+        const sidMatch = line.match(/sid:\s*(\d+);/);
+        if (sidMatch) {
+            const sid = sidMatch[1];
+            const revMatch = line.match(/rev:\s*(\d+);/);
+            const rev = revMatch ? parseInt(revMatch[1], 10) : 0;
+            rules[sid] = { line, rev };
+        }
+    });
+
+    return rules;
+}
+
+function mergeRules(localRules, importedRules) {
+    const mergedRules = { ...localRules };
+
+    Object.keys(importedRules).forEach(sid => {
+        if (!localRules[sid]) {
+            // Nếu SID chưa tồn tại trong local, thêm mới
+            mergedRules[sid] = importedRules[sid];
+        } else if (importedRules[sid].rev > localRules[sid].rev) {
+            // Nếu SID tồn tại và REV mới hơn, ghi đè
+            mergedRules[sid] = importedRules[sid];
+        }
+    });
+
+    // Trả về danh sách các rule đã hợp nhất
+    return Object.values(mergedRules).map(rule => rule.line);
+}
+
+
+
+// Cấu hình Multer
+const upload = multer({
+    limits: {
+        fileSize: 50 * 1024 * 1024 // Giới hạn kích thước mỗi tệp là 50MB
+    }
+});
+
+// API để tải file lên thiết bị từ xa
+// API để tải file lên thiết bị từ xa
+// API để tải file lên thiết bị từ xa
+app.post('/api/uploadFiles', upload.array('file'), async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+    const files = req.files;
+
+    // Kiểm tra xem có file nào được gửi lên hay không
+    if (!files || files.length === 0) {
+        return res.status(400).json({ success: false, message: 'Không có file nào được chọn' });
+    }
+
+    const conn = new Client();
+    conn.on('ready', async () => {
+        try {
+            conn.sftp((err, sftp) => {
+                if (err) {
+                    return res.status(500).json({ success: false, message: 'Lỗi khi kết nối SFTP', error: err.message });
+                }
+
+                // Upload tất cả file
+                Promise.all(files.map(file => {
+                    return new Promise((resolve, reject) => {
+                        const remotePath = `/etc/suricata/rules/${file.originalname}`;
+                        const writeStream = sftp.createWriteStream(remotePath);
+
+                        writeStream.on('close', resolve);
+                        writeStream.on('error', reject);
+
+                        writeStream.write(file.buffer);
+                        writeStream.end();
+                    });
+                }))
+                .then(async () => {
+                    // Sau khi tải file thành công, thực thi cập nhật version ngay trong API này
+                    try {
+                        // Lấy phiên bản từ xa
+                        const remoteResponse = await fetch('https://rules.emergingthreats.net/open/suricata-4.0/version.txt');
+                        
+                        if (!remoteResponse.ok) {
+                            throw new Error(`Failed to fetch remote version, status: ${remoteResponse.status}`);
+                        }
+
+                        // Đọc phiên bản từ xa và loại bỏ khoảng trắng thừa
+                        let remoteVersion = (await remoteResponse.text()).trim();
+
+                        // Loại bỏ tiền tố '#version:' nếu có
+                        if (remoteVersion.startsWith('#version:')) {
+                            remoteVersion = remoteVersion.replace('#version:', '');
+                        }
+
+                        // Đường dẫn tệp phiên bản cục bộ
+                        const localVersionPath = '/etc/suricata/rules/version.txt';
+                        const localVersion = fs.existsSync(localVersionPath) ? fs.readFileSync(localVersionPath, 'utf8').trim() : '';
+
+                        console.log(localVersion);
+                        console.log(remoteVersion);
+
+                        // So sánh các phiên bản
+                        if (compareVersions(remoteVersion, localVersion) > 0) {
+                            // Cập nhật phiên bản cục bộ với phiên bản từ xa
+                            const command = `echo '${remoteVersion.replace(/'/g, "'\\''")}' > ${localVersionPath}`;
+                            await executeCommand(address, 'root', pass, command); // Ghi đè tệp version.txt với phiên bản từ xa
+
+                            console.log('Phiên bản đã được cập nhật thành công');
+                        } else {
+                            console.log('Phiên bản cục bộ đã là phiên bản mới nhất');
+                        }
+                    } catch (error) {
+                        console.error('Lỗi khi cập nhật phiên bản cục bộ:', error.message);
+                    }
+
+                    conn.end();
+                    res.json({ success: true, message: 'Cập nhật thành công' });
+
+                    const restartafterupdate = `/usr/local/etc/chowebApp/restart_suricata.sh`;
+                    await executeCommand(address, 'root', pass, restartafterupdate);
+                })
+                .catch(error => {
+                    conn.end();
+                    res.status(500).json({ success: false, message: 'Lỗi khi tải file lên thiết bị', error: error.message });
+                });
+            });
+        } catch (error) {
+            conn.end();
+            res.status(500).json({ success: false, message: 'Lỗi khi tải file lên thiết bị', error: error.message });
+        }
+    }).connect({
+        host: address,
+        port: 22,
+        username: 'root',
+        password: pass,
+    });
+});
+
+// Hàm so sánh hai phiên bản (so sánh các chuỗi phiên bản theo định dạng x.y.z)
+function compareVersions(version1, version2) {
+    const v1Parts = version1.split('.').map(Number);
+    const v2Parts = version2.split('.').map(Number);
+
+    // So sánh từng phần trong phiên bản
+    for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+        const part1 = v1Parts[i] || 0; // Phần thiếu mặc định là 0
+        const part2 = v2Parts[i] || 0; // Phần thiếu mặc định là 0
+
+        if (part1 > part2) return 1; // version1 lớn hơn version2
+        if (part1 < part2) return -1; // version1 nhỏ hơn version2
+    }
+    return 0; // Các phiên bản bằng nhau
+}
+
+
+
+// API để tải file lên thiết bị từ xa
+app.post('/api/uploadFilesPT', upload.array('file'), async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+    const files = req.files;
+
+    // Kiểm tra xem có file nào được gửi lên hay không
+    if (!files || files.length === 0) {
+        return res.status(400).json({ success: false, message: 'Không có file nào được chọn' });
+    }
+
+    const conn = new Client();
+    conn.on('ready', async () => {
+        try {
+            conn.sftp((err, sftp) => {
+                if (err) {
+                    return res.status(500).json({ success: false, message: 'Lỗi khi kết nối SFTP', error: err.message });
+                }
+
+                // Upload tất cả file
+                Promise.all(files.map(file => {
+                    return new Promise((resolve, reject) => {
+                        const remotePath = `/etc/suricata/rules/${file.originalname}`;
+                        const writeStream = sftp.createWriteStream(remotePath);
+
+                        writeStream.on('close', resolve);
+                        writeStream.on('error', reject);
+
+                        writeStream.write(file.buffer);
+                        writeStream.end();
+                    });
+                }))
+                .then(async () => {
+                    // Sau khi tải file thành công, thực thi cập nhật version ngay trong API này
+                    try {
+                        // Thực thi script cập nhật
+                        const updateScript = `/usr/local/etc/chowebApp/pt_update.sh`;
+                        const updateResult = await executeCommand(address, 'root', pass, updateScript);
+                        console.log('Kết quả script cập nhật:', updateResult);
+
+                        // Khởi động lại Suricata
+                        const restartScript = `/usr/local/etc/chowebApp/restart_suricata.sh`;
+                        const restartResult = await executeCommand(address, 'root', pass, restartScript);
+                        console.log('Kết quả khởi động lại Suricata:', restartResult);
+
+                        conn.end();
+                        res.json({ success: true, message: 'Cập nhật thành công' });
+                    } catch (error) {
+                        conn.end();
+                        console.error('Lỗi khi chạy script cập nhật:', error);
+                        res.status(500).json({
+                            success: false,
+                            message: 'Lỗi khi chạy script cập nhật',
+                            error: error.message || error.toString(),
+                        });
+                    }
+                })
+
+                .catch(error => {
+                    conn.end();
+                    res.status(500).json({ success: false, message: 'Lỗi khi tải file lên thiết bị', error: error.message });
+                });
+            });
+        } catch (error) {
+            conn.end();
+            res.status(500).json({ success: false, message: 'Lỗi khi tải file lên thiết bị', error: error.message });
+        }
+    }).connect({
+        host: address,
+        port: 22,
+        username: 'root',
+        password: pass,
+    });
+});
+
+
+// API để tải file lên thiết bị từ xa
+app.post('/api/uploadExtensionRule', upload.array('file'), async (req, res) => {
+    const { address, pass } = req.session.sshInfo || {};
+    const files = req.files;
+
+    if (!address || !pass) {
+        return res.status(400).json({ success: false, message: 'Thông tin SSH không tồn tại' });
+    }
+
+    if (!files || files.length === 0) {
+        return res.status(400).json({ success: false, message: 'Không có file nào được chọn' });
+    }
+
+    const conn = new Client();
+
+    conn.on('ready', () => {
+        try {
+            conn.sftp((err, sftp) => {
+                if (err) {
+                    return res.status(500).json({ success: false, message: 'Lỗi khi kết nối SFTP', error: err.message });
+                }
+
+                const uploadPromises = files.map(file => {
+                    return new Promise((resolve, reject) => {
+                        const remotePath = `/etc/suricata/rules/${file.originalname}`;
+                        const writeStream = sftp.createWriteStream(remotePath);
+
+                        writeStream.on('close', () => resolve());
+                        writeStream.on('error', reject);
+
+                        writeStream.write(file.buffer);
+                        writeStream.end();
+                    });
+                });
+
+                Promise.all(uploadPromises)
+                    .then(async () => {
+                        try {
+                            const restartScript = `/usr/local/etc/chowebApp/restart_suricata.sh`;
+                            const restartResult = await executeCommand(address, 'root', pass, restartScript);
+                            console.log('Kết quả khởi động lại Suricata:', restartResult);
+
+                            conn.end();
+                            res.json({ success: true, message: 'Cập nhật thành công' });
+                        } catch (error) {
+                            conn.end();
+                            console.error('Lỗi khi chạy script cập nhật:', error);
+                            res.status(500).json({ success: false, message: 'Lỗi khi chạy script cập nhật', error: error.message });
+                        }
+                    })
+                    .catch(error => {
+                        conn.end();
+                        console.error('Lỗi khi tải file lên thiết bị:', error);
+                        res.status(500).json({ success: false, message: 'Lỗi khi tải file lên thiết bị', error: error.message });
+                    });
+            });
+        } catch (error) {
+            conn.end();
+            console.error('Lỗi khi xử lý kết nối SFTP:', error);
+            res.status(500).json({ success: false, message: 'Lỗi xử lý kết nối SFTP', error: error.message });
+        }
+    }).connect({
+        host: address,
+        port: 22,
+        username: 'root',
+        password: pass,
+    });
+
+    conn.on('error', error => {
+        console.error('Lỗi kết nối SSH:', error);
+        res.status(500).json({ success: false, message: 'Lỗi kết nối SSH', error: error.message });
+    });
+});
+
+
+
+// API để cập nhật version.txt trên thiết bị từ xa
+app.post('/api/update-version',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+
+    try {
+        // Lấy nội dung của file version.txt từ URL
+        const response = await fetch('https://rules.emergingthreats.net/open/suricata-4.0/version.txt');
+
+        // Kiểm tra xem file có tồn tại và trả về nội dung hay không
+        if (!response.ok) {
+            throw new Error('Không thể tải file version.txt từ URL');
+        }
+
+
+        console.log(response);
+
+        const versionContent = await response.text(); // Đọc nội dung file version.txt từ URL
+
+        // Lệnh để ghi đè nội dung version.txt vào thiết bị từ xa
+        const command = `echo '${versionContent}' | sshpass -p ${pass} ssh user@${address} 'cat > /etc/suricata/rules/version.txt'`;
+
+        // Thực thi lệnh SSH để ghi đè vào version.txt
+        await executeCommand(address, 'root', pass, command);
+
+        res.json({ message: 'Cập nhật version.txt thành công.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi cập nhật version.txt.', error: error.message });
+    }
+});
+
+//============================================================================================================================//
+// Route để bật/tắt (Enable/Disable) tệp rules
+app.post('/api/rules/toggle',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+    const { fileName, action } = req.body; // Nhận dữ liệu từ request
+
+    try {
+        // Lệnh để gọi script bật/tắt rule qua SSH
+        const command = `/usr/local/etc/chowebApp/suaconfig.sh "${action}" "${fileName}"`;
+        console.log("Executing Command:", command); // Debug lệnh thực thi
+
+        // Sử dụng executeCommand thay vì exec
+        const result = await executeCommand(address, 'root', pass, command);
+        console.log("Command Output:", result); // Debug kết quả lệnh
+
+        // res.json({ message: `Thao tác ${action} thành công cho file ${fileName}.` });
+        res.sendStatus(200);
+    } catch (error) {
+        console.error('Error executing command:', error); // Debug lỗi nếu có
+        res.status(500).json({ message: 'Error executing command', error: error.message });
+    }
+});
+
+//============================================================================================================================//
+// Route để xử lý Enable/Disable file rules
+// Route để kiểm tra trạng thái của file rules
+// API để kiểm tra trạng thái nhiều rule
+app.get('/api/rules/status',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+
+    // Danh sách các rules cần kiểm tra
+    const rulesToCheck = [
+        'trafficid.rules',
+        'hunting.rules',
+        'sslblacklist_tls_cert.rules',
+        'sslipblacklist_aggressive.rules',
+        'ja3_fingerprints.rules',
+        'custom.rules'
+    ];
+
+    try {
+        // Tạo lệnh kiểm tra trạng thái của tất cả các rules
+        const command = rulesToCheck
+            .map(rule => `grep -E "^[[:space:]]*#[[:space:]]*-[[:space:]]*${rule}" /etc/suricata/suricata.yaml || echo "${rule}:Enable"`)
+            .join(' && ');
+
+        // Thực thi lệnh qua SSH
+        const result = await executeCommand(address, 'root', pass, command);
+
+        // Phân tích kết quả
+        const statuses = {};
+        rulesToCheck.forEach(rule => {
+            const regex = new RegExp(`^.*${rule}.*$`, 'm');
+            const match = result.match(regex);
+            if (match) {
+                statuses[rule] = match[0].startsWith('#') ? 'Disable' : 'Enable';
+            } else {
+                statuses[rule] = 'Unknown'; // Nếu không tìm thấy dòng
+            }
+        });
+
+        res.json({ statuses });
+    } catch (error) {
+        res.status(500).json({ message: 'Error checking rule statuses', error: error.message });
+    }
+});
+
+app.post('/api/rules/updateStatus',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+    const { ruleName, enable } = req.body; // Nhận tên rule và trạng thái cần cập nhật
+
+    if (!ruleName) {
+        return res.status(400).json({ message: 'Rule name is required.' });
+    }
+
+    try {
+        // Lệnh để thêm hoặc bỏ # đầu dòng
+        const updateCommand = enable
+            ? `sed -i 's/^# - ${ruleName}/ - ${ruleName}/' /etc/suricata/suricata.yaml`
+            : `sed -i 's/^ - ${ruleName}/# - ${ruleName}/' /etc/suricata/suricata.yaml`;
+
+        // Thực thi lệnh SSH để cập nhật file
+        await executeCommand(address, 'root', pass, updateCommand);
+
+        // Khởi động lại Suricata
+        const restartCommand = `/usr/local/etc/chowebApp/restart_suricata.sh`;
+        await executeCommand(address, 'root', pass, restartCommand);
+
+        res.json({ message: `Rule ${ruleName} updated successfully.` });
+    } catch (error) {
+        res.status(500).json({ message: `Error updating rule ${ruleName}.`, error: error.message });
+    }
+});
+
+
+
+
+
+
+
+
+//============================================================================================================================//
+// Bat dau check updtae
+// Route để kiểm tra phiên bản của file local và remote
+app.get('/api/check-updateET',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+    const remoteVersionUrl = 'https://rules.emergingthreats.net/open/old/suricata-4.0/version.txt'; // URL của phiên bản remote
+    const localFilePath = '/etc/suricata/rules/version.txt'; // Đường dẫn tới file version.txt local
+
+    try {
+        // Lấy phiên bản từ file local
+        const localVersion = await executeCommand(address, 'root', pass, `cat ${localFilePath}`);
+
+        // Lấy nội dung phiên bản từ URL remote
+        const response = await fetch(remoteVersionUrl);
+        const remoteVersion = await response.text();
+
+        // In ra kết quả phiên bản local và remote để debug
+        console.log("Local Version:", localVersion.trim());
+        console.log("Remote Version:", remoteVersion.trim());
+
+        // So sánh phiên bản local và remote
+        if (localVersion.trim() < remoteVersion.trim()) {
+            res.json({
+                updateAvailable: true,
+                localVersion: localVersion.trim(),
+                remoteVersion: remoteVersion.trim(),
+            });
+        } else if (localVersion.trim() === remoteVersion.trim()) {
+            res.json({
+                updateAvailable: false,
+                localVersion: localVersion.trim(),
+                remoteVersion: remoteVersion.trim(),
+            });
+        } else {
+            res.status(400).json({
+                message: 'Local version is newer than remote version',
+                localVersion: localVersion.trim(),
+                remoteVersion: remoteVersion.trim(),
+            });
+        }
+    } catch (error) {
+        // Xử lý lỗi
+        res.status(500).json({
+            message: 'Error checking update',
+            error: error.message,
+        });
+    }
+});
+
+
+// API để kiểm tra sự khác biệt giữa file local và remote
+// Hàm tính giá trị băm của file
+function getFileHash(fileContent) {
+    return crypto.createHash('sha256').update(fileContent, 'utf8').digest('hex');
+}
+
+// Hàm lọc ra các dòng chứa SID
+function getSidLines(fileContent) {
+    const lines = fileContent.split('\n');
+    return lines.filter(line => line.includes('sid:'));
+}
+
+// Hàm so sánh các dòng có SID giống nhau
+function compareSidLines(localSidLines, remoteSidLines) {
+    let differences = [];
+
+    localSidLines.forEach(localLine => {
+        const localSid = localLine.match(/sid:(\d+)/);
+        if (localSid) {
+            const remoteLine = remoteSidLines.find(remoteLine => remoteLine.includes(`sid:${localSid[1]}`));
+            if (remoteLine) {
+                // Sử dụng thư viện diff để so sánh các dòng SID
+                const lineDiff = diff.diffWords(localLine, remoteLine);
+                const diffResult = lineDiff.filter(part => part.added || part.removed); // Chỉ lấy phần có sự thay đổi
+
+                if (diffResult.length > 0) {
+                    // Phân biệt rõ sự khác biệt giữa local và remote
+                    const differenceDetail = diffResult.map(part => {
+                        if (part.added) {
+                            return `Remote: ${part.value}`;
+                        } else if (part.removed) {
+                            return `Local: ${part.value}`;
+                        }
+                        return ''; // Phần không có thay đổi không cần hiển thị
+                    }).join(' ');
+
+                    differences.push({
+                        SID: localSid[1],
+                        local: localLine,
+                        remote: remoteLine,
+                        diff: differenceDetail.trim() // Chỉ rõ sự khác biệt giữa Local và Remote
+                    });
+                }
+            }
+        }
+    });
+
+    return differences;
+}
+
+
+//=============================================================================================================================//
+
+
+// API để kiểm tra cập nhật PT
+app.get('/api/check-updatePT',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Lấy thông tin SSH từ session
+    const scriptPath = '/usr/local/etc/chowebApp/pt.sh'; // Đường dẫn script trên thiết bị
+
+    try {
+        // Thực thi script trên thiết bị qua SSH
+        const result = await executeCommand(address, 'root', pass, `sh ${scriptPath}`);
+
+        // Xử lý kết quả từ script
+        const trimmedResult = result.trim();
+        console.log("Script Output:", trimmedResult);
+
+        if (trimmedResult === 'new') {
+            res.json({ updateAvailable: true, message: 'Có bản cập nhật mới' });
+        } else if (trimmedResult === 'no') {
+            res.json({ updateAvailable: false, message: 'Không có bản cập nhật mới' });
+        } else {
+            res.status(400).json({ message: 'Unexpected script output', output: trimmedResult });
+        }
+    } catch (error) {
+        // Xử lý lỗi
+        console.error("Error executing script:", error);
+        res.status(500).json({ message: 'Error checking update', error: error.message });
+    }
+});
+
+
+//=============================================================================================================================//
+// Route để lấy danh sách các file .rules từ thiết bị từ xa
+app.get('/api/files',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo;
+
+    // Danh sách file cần lọc (chỉ lấy các file này)
+    const allowedFiles = [
+        "3coresec.rules",
+        "botcc.portgrouped.rules",
+        "botcc.rules",
+        "ciarmy.rules",
+        "compromised.rules",
+        "dshield.rules",
+        "drop.rules",
+        "emerging-activex.rules",
+        "emerging-attack_response.rules",
+        "emerging-chat.rules",
+        "emerging-current_events.rules",
+        "emerging-deleted.rules",
+        "emerging-dns.rules",
+        "emerging-dos.rules",
+        "emerging-exploit.rules",
+        "emerging-ftp.rules",
+        "emerging-games.rules",
+        "emerging-icmp_info.rules",
+        "emerging-icmp.rules",
+        "emerging-imap.rules",
+        "emerging-inappropriate.rules",
+        "emerging-info.rules",
+        "emerging-malware.rules",
+        "emerging-misc.rules",
+        "emerging-mobile_malware.rules",
+        "emerging-netbios.rules",
+        "emerging-p2p.rules",
+        "emerging-policy.rules",
+        "emerging-pop3.rules",
+        "emerging-retired.rules",
+        "emerging-rpc.rules",
+        "emerging-scada.rules",
+        "emerging-scan.rules",
+        "emerging-shellcode.rules",
+        "emerging-smtp.rules",
+        "emerging-snmp.rules",
+        "emerging-sql.rules",
+        "emerging-telnet.rules",
+        "emerging-tftp.rules",
+        "emerging-trojan.rules",
+        "emerging-user_agents.rules",
+        "emerging-voip.rules",
+        "emerging-web_client.rules",
+        "emerging-web_server.rules",
+        "emerging-web_specific_apps.rules",
+        "emerging-worm.rules",
+        "tor.rules"
+    ];
+
+    try {
+        // Lấy danh sách file .rules từ thư mục /etc/suricata/rules/
+        const fileList = await executeCommand(address, 'root', pass, 'ls /etc/suricata/rules/*.rules');
+
+        // Chuyển danh sách file từ string thành mảng, lọc theo danh sách allowedFiles
+        const ruleFiles = fileList.split('\n')
+            .map(file => path.basename(file.trim()))  // Lấy tên file (bỏ đường dẫn)
+            .filter(file => allowedFiles.includes(file));  // Chỉ giữ lại file có trong danh sách allowedFiles
+
+        console.log("Danh sách file sau khi lọc:", ruleFiles);
+
+        // Trả về danh sách file đã lọc
+        res.json(ruleFiles);
+    } catch (error) {
+        console.error('Error fetching file list:', error);
+        res.status(500).json({ message: 'Error fetching files', error: error.message });
+    }
+});
+
+
+
+
+//=============================================================================================================================//
+// Route để so sánh file với remote
+
+function removeBlankLinesAtEdges(content) {
+    // Loại bỏ các dòng trống ở đầu và cuối nội dung
+    return content.replace(/^\s*\n|\n\s*$/g, '');
+}
+app.get('/api/compare/:filename',  async (req, res) => {
+    // console.log('SSH Info:', req.session.sshInfo);
+    const { address, pass } = req.session.sshInfo;
+    const filename = req.params.filename;
+
+    const remoteFilePath = `/etc/suricata/rules/${filename}`;
+    const remoteFileUrl = `https://rules.emergingthreats.net/open/old/suricata-4.0/rules/${filename}`;
+
+    try {
+        // Đọc file từ thiết bị từ xa
+        const remoteFileContent = await executeCommand(address, 'root', pass, `cat ${remoteFilePath}`);
+        if (!remoteFileContent) {
+            throw new Error('Không thể đọc file từ thiết bị từ xa');
+        }
+        // console.log(`Fetched remote file content for ${filename}`);
+
+        // Tải file remote từ URL
+        const remoteResponse = await fetch(remoteFileUrl);
+        if (!remoteResponse.ok) {
+            throw new Error(`Không thể tải file từ URL: ${remoteFileUrl}`);
+        }
+        const remoteOnlineFileContent = await remoteResponse.text();
+        // console.log(`Fetched online file content for ${filename}`);
+
+         // Loại bỏ các dòng trống ở đầu và cuối nội dung file
+         const cleanedRemoteFileContent = removeBlankLinesAtEdges(remoteFileContent);
+         const cleanedRemoteOnlineFileContent = removeBlankLinesAtEdges(remoteOnlineFileContent);
+
+        // So sánh băm của file remote
+        // So sánh băm của file remote
+        const localFileHash = getFileHash(cleanedRemoteFileContent);
+        const remoteFileHash = getFileHash(cleanedRemoteOnlineFileContent)
+
+        if (localFileHash === remoteFileHash) {
+            res.json({
+                status: 'No change',
+                message: 'Không có sự thay đổi'
+            });
+        } else {
+            // Nếu băm khác nhau, tiến hành so sánh nội dung
+            const localSidLines = getSidLines(remoteFileContent); // Dòng chứa SID từ file local
+            const remoteSidLines = getSidLines(remoteOnlineFileContent); // Dòng chứa SID từ file remote
+            const differences = compareSidLines(localSidLines, remoteSidLines); //So sánh SID: Nếu các giá trị trong hai dòng hoàn toàn giống nhau (chỉ khác nhau về khoảng trắng), kết quả so sánh sẽ không phát hiện sự khác biệt nào.
+
+            res.json({
+                status: differences.length > 0 ? 'Changed' : 'No SID differences',
+                message: differences.length > 0 ? `Có sự thay đổi` : 'Có sự thay đổi nhưng không có khác biệt SID.',
+                diff: differences
+            });
+        }
+    } catch (error) {
+        console.error('Error comparing files:', error);
+        res.status(500).json({ status: 'error', message: 'Error comparing files', error: error.message });
+    }
+});
+
+
+
+// API lấy danh sách rules
+const statusFilePath = '/etc/suricata/rules/switchmode_data.txt'; // Đường dẫn file dữ liệu
+const switchModeScript = '/usr/local/etc/chowebApp/switchmode.sh'; // Đường dẫn script
+
+// API lấy danh sách rules
+app.get('/api/switchmode/get-rules',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Thông tin SSH
+    const catCommand = `cat ${statusFilePath}`; // Lệnh đọc file từ thiết bị từ xa
+
+    try {
+        // 1. Chạy script để cập nhật file switchmode_data.txt
+        const runScriptCommand = `sh ${switchModeScript}`;
+        await executeCommand(address, 'root', pass, runScriptCommand);
+
+        // 2. Đọc nội dung file switchmode_data.txt
+        const result = await executeCommand(address, 'root', pass, catCommand);
+
+        // 3. Parse dữ liệu từ file
+        const rulesData = result
+            .trim()
+            .split('\n')
+            .map((line) => {
+                const parts = line.split(' '); // Tách dòng theo dấu cách
+                return {
+                    name: parts[0], // Tên rule
+                    status: parts[1], // Trạng thái hiện tại
+                    lastModified: parts.slice(2).join(' ') // Thời gian sửa đổi
+                };
+            });
+
+        // 4. Trả về dữ liệu JSON
+        res.json(rulesData);
+    } catch (error) {
+        console.error('Error fetching rules:', error);
+        res.status(500).json({ message: 'Error fetching rules', error: error.message });
+    }
+});
+
+
+// API cập nhật trạng thái rules
+// API cập nhật trạng thái rules
+app.post('/api/switchmode/update-rules',  async (req, res) => {
+    const { address, pass } = req.session.sshInfo; // Thông tin SSH
+    const { rules } = req.body; // Danh sách rules cần cập nhật (dạng "name status")
+
+    console.log('Dữ liệu gửi lên:', rules); // Log dữ liệu từ client
+
+    try {
+        // Đọc dữ liệu từ switchmode_data.txt trước khi cập nhật
+        const readCommand = `cat ${statusFilePath}`;
+        const beforeUpdateData = await executeCommand(address, 'root', pass, readCommand);
+        console.log('Dữ liệu trong switchmode_data.txt (trước khi cập nhật):\n', beforeUpdateData);
+
+        // Tạo lệnh `sed` để cập nhật từng rule
+        const updateCommands = rules.map((rule) => {
+            const [name, status] = rule.split(' '); // Tách tên rule và trạng thái
+            const escapedName = name.replace(/(["`\\])/g, '\\$1'); // Escape tên rule
+            // Cập nhật duy nhất trường thứ 2
+            return `sed -i 's|^${escapedName} [^ ]*|${name} ${status}|' ${statusFilePath}`;
+        }).join(' && ');
+
+        // Thực thi lệnh cập nhật trên thiết bị từ xa
+        console.log('Thực thi cập nhật...');
+        await executeCommand(address, 'root', pass, updateCommands);
+
+        // Đọc dữ liệu sau khi cập nhật
+        const afterUpdateData = await executeCommand(address, 'root', pass, readCommand);
+        console.log('Dữ liệu trong switchmode_data.txt (sau khi cập nhật):\n', afterUpdateData);
+
+        // *** Cải tiến: Gọi script Bash để thực thi thay đổi ***
+        const scriptArgs = rules.map((rule) => `"${rule}"`).join(' ');
+        const executeScriptCommand = `/usr/local/etc/chowebApp/switchmode_update.sh ${scriptArgs}`;
+        console.log('Thực thi script Bash với lệnh:', executeScriptCommand);
+        const scriptResult = await executeCommand(address, 'root', pass, executeScriptCommand);
+        console.log('Kết quả từ script Bash:\n', scriptResult);
+
+        // Nếu thành công, thực thi lệnh restart
+        const restartCommand1 = `/usr/local/etc/chowebApp/restart_suricata.sh`;
+        console.log('Thực thi restart Suricata với lệnh:', restartCommand1);
+        const restartResult1 = await executeCommand(address, 'root', pass, restartCommand1);
+        console.log('Kết quả từ restart Suricata:\n', restartResult1);
+
+        // Trả về kết quả thành công
+        res.json({
+            message: 'Cập nhật trạng thái thành công',
+            beforeUpdate: beforeUpdateData,
+            afterUpdate: afterUpdateData,
+            scriptOutput: scriptResult,
+        });
+    } catch (error) {
+        console.error('Error updating rules:', error);
+        res.status(500).json({ message: 'Error updating rules', error: error.message });
+    }
+});
+
+
+
+
+
+//============================================================================================================================//
+// API để gọi script addrule.sh
+// Lấy thông tin MAC từ IP
+app.post('/get-mac-info', (req, res) => {
+    const ip = req.body.ip;
+
+    if (!ip) {
+        return res.status(400).json({ error: "Vui lòng nhập địa chỉ IP" });
+    }
+
+    // Gọi script Bash iptables_manager.sh với IP
+    exec(`bash ./script/addrule.sh ${ip}`, (err, stdout, stderr) => {
+        if (err) {
+            console.error('Lỗi khi thực thi script:', err);
+            return res.status(500).json({ error: 'Không tìm thấy địa chỉ MAC cho IP đã nhập!' });
+        }
+
+        if (stderr) {
+            console.error('stderr:', stderr);
+            return res.status(500).json({ error: 'Có lỗi xảy ra trong khi thực thi script' });
+        }
+
+        try {
+            const jsonData = JSON.parse(stdout.trim());
+            res.json(jsonData);
+        } catch (parseError) {
+            console.error('Lỗi phân tích cú pháp JSON:', parseError);
+            return res.status(500).json({ error: 'Lỗi phân tích cú pháp kết quả từ script' });
+        }
+    });
+});
+
+// Cập nhật trạng thái MAC (ACCEPT/DROP)
+app.post('/update-mac-status', (req, res) => {
+    const { macAddress, action } = req.body;
+
+    if (!macAddress || !action) {
+        return res.status(400).json({ error: "Thiếu địa chỉ MAC hoặc trạng thái" });
+    }
+
+    // Kiểm tra action hợp lệ
+    if (action !== "ACCEPT" && action !== "DROP") {
+        return res.status(400).json({ error: "Hành động không hợp lệ. Chỉ chấp nhận ACCEPT hoặc DROP" });
+    }
+
+    // Gọi script Bash iptables_manager.sh với MAC và action
+    exec(`bash ./script/addrule.sh ${macAddress} ${action}`, (err, stdout, stderr) => {
+        if (err) {
+            console.error('Lỗi khi cập nhật trạng thái:', err);
+            return res.status(500).json({ error: 'Không thể cập nhật trạng thái' });
+        }
+
+        if (stderr) {
+            console.error('stderr:', stderr);
+            return res.status(500).json({ error: 'Lỗi xảy ra khi cập nhật trạng thái' });
+        }
+
+        try {
+            const jsonData = JSON.parse(stdout.trim());
+            res.json(jsonData);
+        } catch (parseError) {
+            console.error('Lỗi phân tích cú pháp JSON:', parseError);
+            return res.status(500).json({ error: 'Lỗi phân tích cú pháp kết quả từ script' });
+        }
+    });
+});
+
+// Đảm bảo bạn chỉ định đúng thư mục chứa file script
+// API lấy top 4 domain và IP có lượng truy cập cao nhất
+app.post('/get-top-traffic', (req, res) => {
+    exec(`bash ./script/traffic_stats.sh`, (err, stdout, stderr) => {
+        if (err) {
+            console.error('Lỗi khi lấy dữ liệu thống kê:', err);
+            return res.status(500).json({ error: 'Không thể lấy dữ liệu thống kê' });
+        }
+
+        if (stderr) {
+            console.error('stderr:', stderr);
+            return res.status(500).json({ error: 'Lỗi xảy ra khi xử lý log' });
+        }
+
+        try {
+            const jsonData = JSON.parse(stdout.trim());
+            res.json(jsonData);
+        } catch (parseError) {
+            console.error('Lỗi phân tích JSON:', parseError);
+            return res.status(500).json({ error: 'Lỗi xử lý kết quả từ script' });
+        }
+    });
+});
+
+// API để lấy thông tin chủ sở hữu từ IP
+// API để lấy thông tin chủ sở hữu từ IP
+app.post('/get-owner-from-ip', (req, res) => {
+    const { ip } = req.body;
+
+    if (!ip) {
+        return res.status(400).json({ error: "Thiếu địa chỉ IP" });
+    }
+
+    // Gọi script find-owner-from-ip.sh để lấy thông tin MAC và chủ sở hữu từ IP
+    exec(`bash ./script/find-owner-from-ip.sh ${ip}`, (err, stdout, stderr) => {
+        if (err) {
+            console.error('Lỗi khi tìm chủ sở hữu:', err);
+            return res.status(500).json({ error: 'Không thể tìm chủ sở hữu' });
+        }
+
+        if (stderr) {
+            console.error('stderr:', stderr);
+            return res.status(500).json({ error: 'Lỗi xảy ra khi tìm chủ sở hữu' });
+        }
+
+        try {
+            const jsonData = JSON.parse(stdout.trim());
+            res.json(jsonData);  // Trả về thông tin chủ sở hữu dưới dạng JSON
+        } catch (parseError) {
+            console.error('Lỗi phân tích cú pháp JSON:', parseError);
+            return res.status(500).json({ error: 'Lỗi phân tích cú pháp kết quả từ script' });
+        }
+    });
+});
+
+
+app.post('/add-firewall-rule', (req, res) => {
+    const { rule } = req.body;
+    console.log("Received add-firewall-rule request:", req.body);
+
+    if (!rule) {
+        console.error("Missing rule parameter");
+        return res.status(400).json({ error: "Missing rule parameter" });
+    }
+    
+    // Gọi script add-iptables-rule.sh với rule được truyền vào
+    const command = `bash ./script/add-iptables-rule.sh "${rule}"`;
+    console.log("Executing command:", command);
+    
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
+            console.error("Error executing add-iptables-rule.sh:", err);
+            return res.status(500).json({ error: "Unable to add rule" });
+        }
+        
+        if (stderr) {
+            console.error("Script stderr:", stderr);
+            // Có thể bỏ qua stderr nếu không quan trọng
+        }
+        
+        console.log("Script stdout:", stdout);
+        
+        try {
+            const result = JSON.parse(stdout.trim());
+            res.json({ success: true, data: result });
+        } catch (parseError) {
+            console.error("JSON parsing error:", parseError);
+            // Nếu không parse được, trả về stdout thô
+            return res.status(500).json({ error: "Error parsing script output", rawOutput: stdout.trim() });
+        }
+    });
+});
+
+
+// API để lấy thoong tin iptables
+app.post('/get-firewall-from-table', (req, res) => {
+    const { tableName } = req.body;
+
+    if (!tableName) {
+        // return res.status(400).json({ error: "Thiếu tên bảng" });
+        pass
+    }
+
+    // Gọi script getfirewall.sh để lấy thông tin từ bảng
+    exec(`bash ./script/getfirewall.sh ${tableName}`, (err, stdout, stderr) => {
+        if (err) {
+            console.error('Lỗi khi lấy thông tin firewall:', err);
+            return res.status(500).json({ error: 'Không thể lấy thông tin firewall' });
+        }
+
+        if (stderr) {
+            console.error('stderr:', stderr);
+            // return res.status(500).json({ error: 'Lỗi xảy ra khi lấy thông tin firewall' });
+        }
+
+        try {
+            const jsonData = JSON.parse(stdout.trim());
+            res.json(jsonData);  // Trả về thông tin firewall dưới dạng JSON
+        } catch (parseError) {
+            console.error('Lỗi phân tích cú pháp JSON:', parseError);
+            return res.status(500).json({ error: 'Lỗi phân tích cú pháp kết quả từ script' });
+        }
+        console.log(`run end duyet`);
+    });
+});
+
+
+// --- API: Xóa rule iptables ---
+// Endpoint nhận { tableName, ruleIndexes } và gọi script fixiptables.sh để xóa rule.
+app.post('/delete-firewall-rule', (req, res) => {
+    const { tableName, ruleIndexes, chainName } = req.body;
+    console.log("Received delete-firewall-rule request:", req.body);
+  
+    if (!tableName || !chainName || !ruleIndexes || !Array.isArray(ruleIndexes)) {
+      console.error("Missing required parameters: tableName, chainName, or ruleIndexes");
+      return res.status(400).json({ error: "Thiếu thông tin cần thiết" });
+    }
+    
+    // Nối các ruleIndexes thành chuỗi (mỗi rule được phân cách bằng khoảng trắng)
+    const indexes = ruleIndexes.join(' ');
+    // Xây dựng lệnh gọi script fixiptables.sh với các tham số: tableName, chainName và danh sách ruleIndexes
+    const command = `bash ./script/fixiptables.sh ${tableName} ${chainName} ${indexes}`;
+    console.log("Executing command:", command);
+    
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        console.error('Error executing fixiptables.sh:', err);
+        return res.status(500).json({ error: 'Không thể xóa rule' });
+      }
+      
+      if (stderr) {
+        console.error('Script stderr output:', stderr);
+      }
+      
+      console.log('Script stdout output:', stdout);
+      
+      try {
+        const result = JSON.parse(stdout.trim());
+        console.log("Parsed result:", result);
+        res.json({ success: true, data: result });
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        return res.status(500).json({ error: 'Lỗi phân tích cú pháp kết quả từ script' });
+      }
+    });
+  });
+  
+
+
+  // --- API: Xóa rule iptables ---
+  // Endpoint nhận { tableName, ruleIndexes } và gọi script fixiptables.sh để xóa rule.
+  app.post('/delete-firewall-rule', (req, res) => {
+    const { tableName, ruleIndexes } = req.body;
+    if (!tableName || !ruleIndexes || !Array.isArray(ruleIndexes)) {
+      return res.status(400).json({ error: "Thiếu thông tin cần thiết" });
+    }
+    
+    // Nối các ruleIndexes thành chuỗi (mỗi rule được phân cách bằng khoảng trắng)
+    const indexes = ruleIndexes.join(' ');
+    
+    // Gọi script fixiptables.sh với các tham số: tableName và danh sách rule indexes cần xóa
+    exec(`bash ./script/fixiptables.sh ${tableName} ${indexes}`, (err, stdout, stderr) => {
+      if (err) {
+        console.error('Lỗi khi xóa rule:', err);
+        return res.status(500).json({ error: 'Không thể xóa rule' });
+      }
+      if (stderr) {
+        console.error('stderr:', stderr);
+      }
+      try {
+        const result = JSON.parse(stdout.trim());
+        res.json({ success: true, data: result });
+      } catch (parseError) {
+        console.error('Lỗi phân tích cú pháp JSON:', parseError);
+        return res.status(500).json({ error: 'Lỗi phân tích cú pháp kết quả từ script' });
+      }
+    });
+  });
+
+
+
+
+//tam chuan 
+let cachedStaticLogData = {};  // Bộ nhớ tạm để lưu các tệp log tĩnh
+
+// Lưu ngày hiện tại để kiểm tra có phải ngày mới không
+let lastCheckedDate = null;
+
+app.get('/get-log-from-pihole', async (req, res) => {
+    const logFiles = ['pihole.log.3.gz', 'pihole.log.2.gz', 'pihole.log.1', 'pihole.log'];
+
+    // Kiểm tra ngày hiện tại và so sánh với ngày đã lưu để reset cache nếu cần
+    const currentDate = new Date().toISOString().split('T')[0];  // Lấy ngày hiện tại theo định dạng YYYY-MM-DD
+    console.log('Current Date:', currentDate);
+    console.log('Last Checked Date:', lastCheckedDate);
+
+    // Nếu ngày hiện tại khác ngày đã kiểm tra, reset cache
+    if (lastCheckedDate !== currentDate) {
+        console.log('New day detected. Resetting cache.');
+        cachedStaticLogData = {};  // Reset cache
+        lastCheckedDate = currentDate;  // Cập nhật ngày kiểm tra mới
+    }
+
+    let logDataArray = [];
+    try {
+        await Promise.all(logFiles.map(async (logFile) => {
+            return new Promise((resolve, reject) => {
+                // In ra trạng thái cache trước khi kiểm tra
+                // console.log(`Checking cache for ${logFile}:`, cachedStaticLogData[logFile]);
+
+                // Nếu là 'pihole.log' hoặc log chưa được cached, thực hiện phân tích
+                if (logFile === 'pihole.log' || !cachedStaticLogData[logFile]) {
+                    console.log(`Fetching new log data for ${logFile}`); // Debug khi đang gọi dữ liệu mới
+
+                    exec(`bash ./script/analyze-log.sh ${logFile}`, (err, stdout, stderr) => {
+                        if (err) {
+                            // console.error('Lỗi khi gọi script:', err);
+                            reject('Lỗi xảy ra trong quá trình thực thi script');
+                        }
+
+                        if (stderr) {
+                            console.error('stderr:', stderr);
+                            reject('Lỗi xảy ra khi phân tích log');
+                        }
+
+                        try {
+                            const logData = JSON.parse(stdout.trim());
+                            // In ra log mới để debug
+                            // console.log(`New log data for ${logFile}:`, logData);
+
+                            if (logFile !== 'pihole.log') {
+                                cachedStaticLogData[logFile] = logData;  // Lưu dữ liệu log tĩnh vào cache
+                            }
+                            logDataArray.push(logData);
+                            resolve();
+                        } catch (parseError) {
+                            // console.error('Lỗi phân tích cú pháp JSON:', parseError);
+                            reject('Lỗi phân tích cú pháp kết quả từ script');
+                        }
+                    });
+                } else {
+                    // In ra cache khi đang lấy dữ liệu từ cache
+                    // console.log(`Using cached data for ${logFile}:`, cachedStaticLogData[logFile]);
+
+                    logDataArray.push(cachedStaticLogData[logFile]);  // Lấy dữ liệu từ cache cho các file log tĩnh
+                    resolve();
+                }
+            });
+        }));
+
+        // Không cần đảo ngược (reverse), vì chúng ta đã truyền thứ tự đúng từ đầu
+        // console.log('Returning log data:', logDataArray);  // Debug dữ liệu trả về từ API
+        res.json(logDataArray);  // Trả dữ liệu log đã phân tích
+
+    } catch (error) {
+        console.error('Lỗi tổng:', error);
+        res.status(500).json({ error: error });
+    }
+});
+
+//============================================================================================================================//
+// Route xử lý tất cả các route không được định nghĩa
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html', 'error.html'));
+});
+
+// Khởi động server
+const server = app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
+});
+
+
+
+// Hàm để lấy dữ liệu session
+function getSessionData(sessionId) {
+    // Trả về thông tin SSH từ biến toàn cục
+    return globalSshInfo;
+}
+

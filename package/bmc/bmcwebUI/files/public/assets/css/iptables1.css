@@ -1,0 +1,213 @@
+/* Phần Add Rule - hiển thị nhiều cột */
+
+/* Container chính của Add Rule */
+#add-rule-view {
+    background-color: #282828;
+    color: #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    max-width: 1500px; /* Tăng độ rộng tối đa để có không gian cho 2 cột */
+    width: 1500px;
+    margin: 15px auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  /* Header của Add Rule */
+  .addrule-header-unique {
+    display: flex;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
+  }
+  
+  .addrule-header-unique h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    color: #ddd;
+  }
+  
+  #back-btn {
+    font-size: 1.2em;
+    color: #ddd;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  #back-btn:hover {
+    color: #bbb;
+  }
+  
+  
+  /* Sử dụng Grid cho form để hiển thị 2 cột (hoặc 1 cột trên màn hình hẹp) */
+  #rule-form-unique {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(350px, 1fr));
+    grid-auto-rows: auto;
+    gap: 1rem;
+    /* Giúp các fieldset chia thành 2 cột nếu đủ rộng, còn hẹp thì tự động xuống dòng */
+  }
+  
+  /* Fieldset cho từng nhóm */
+  .addrule-fieldset {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .addrule-fieldset legend {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ddd;
+    margin-bottom: 5px;
+  }
+  
+  /* Form group hiển thị ngang: label & input/select */
+  .addrule-form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .addrule-form-group label {
+    width: 40%; /* Chiều rộng label */
+    font-weight: bold;
+    font-size: 14px;
+    color: #ddd;
+    margin-bottom: 0; /* Xóa margin mặc định */
+  }
+  
+  .addrule-form-group input,
+  .addrule-form-group select {
+    flex: 1; /* Input/Select chiếm phần còn lại */
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+  }
+  
+  .addrule-form-group input::placeholder {
+    color: #bbb;
+  }
+  
+  /* Select nhiều lựa chọn (cho Connection States) */
+  .addrule-form-group select[multiple] {
+    height: 80px; /* Tùy chỉnh chiều cao */
+  }
+  
+
+  
+  /* Nút Lưu Rule */
+  #rule-form-unique button.iptables-btn {
+    background: #4f5ea5;
+    color: white;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+  }
+  
+  #rule-form-unique button.iptables-btn:hover {
+    background: hsl(221, 55%, 23%);
+  }
+
+
+  /* Cho fieldset "Địa chỉ mạng và Cổng" chiếm 2 cột trong grid 3 cột */
+.network-and-port {
+    grid-column: 2 / span 2;
+  }
+
+
+/* Các hàng trong phần Địa chỉ mạng và Cổng */
+.addrule-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 10px;
+  }
+  
+  /* Cho các form-group chia thành 2 cột */
+  .addrule-form-group.half {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Cho form-group chiếm toàn bộ hàng */
+  .addrule-form-group.full {
+    flex: 1 1 100%;
+  }
+
+
+  /* Căn giữa hàng đặc biệt */
+.centered-row {
+    justify-content: center;
+  }
+
+
+/* Header của Add Rule - cập nhật hiển thị trên 1 hàng */
+.addrule-header-unique {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Khoảng cách giữa các phần */
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 7px;
+  }
+  
+  .addrule-header-unique h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    color: #ddd;
+  }
+  
+  /* Style cho chain info nằm cùng hàng */
+  #chain-info-text {
+    font-size: 16px;
+    font-style: italic;
+    margin-top: 8px;
+    color: #aaa;
+    margin-left: 500px; /* Đẩy thông tin chain sang bên phải nếu cần */
+  }
+  
+  /* Style riêng cho tên chain */
+
+  
+
+  .addrule-button-container {
+    grid-column: 1 / span 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    width: 1300px;
+
+  }
+  
+
+
+  #selected-options {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ddd; /* Màu mặc định, JS sẽ cập nhật nếu có */
+    padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #3a3a3a;
+    border-radius: 4px;
+  }
+  

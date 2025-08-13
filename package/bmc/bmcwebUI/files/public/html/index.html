@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Trình quản lý BMC IDS/IPS</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <title>SSH Web Client</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/style_capnhat.css">
+    <link rel="stylesheet" href="/assets/css/capnhat.css">
+    
+
+  
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="../../assets/images/iconnho.png" />
+  </head>
+  <body>
+  <!-- index.html -->
+      <div class="container-scroller">
+        <div id="sidebar-container"></div>
+        <script>
+            $(document).ready(function() {
+                $('#sidebar-container').load("../partials/_sidebar.html");
+            });
+        </script>
+      </div>
+
+
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:../../partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+          <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+            <a class="navbar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+          </div>
+
+        </nav>
+        
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            
+
+           <div class="row">
+
+                  
+
+            </div>
+
+            <!-- Dòng tiêu đề System Information ở trên cùng, căn trái, nổi bật -->
+            <div style="font-size: 1.25rem; font-weight: 600; margin: 0 0 18px 0; text-align: left; color: #fff; max-width: 1100px;">Thông tin thiết bị</div>
+
+            <!-- Gauge dashboard style -->
+            <div class="gauge-container" style="width:100%;display:flex;justify-content:center;margin-top:56px;margin-bottom:10px;">
+              <div class="gauge-row" style="display:flex;flex-direction:row;flex-wrap:nowrap;width:auto;justify-content:center;align-items:flex-start;">
+                <div class="gauge-col" style="margin-right:100px">
+                  <div id="gauge-cpu" class="gauge"></div>
+                  <div class="gauge-info" id="cpu-info" style="display:block;width:100%;text-align:center;font-family:'Montserrat','Roboto',Arial,sans-serif;font-weight:700;font-size:1.08em;color:#fff;letter-spacing:0.5px;">CPU:</div>
+                </div>
+                <div class="gauge-col" style="margin-right:100px">
+                  <div id="gauge-ram" class="gauge"></div>
+                  <div class="gauge-info" id="ram-info" style="display:block;width:100%;text-align:center;font-family:'Montserrat','Roboto',Arial,sans-serif;font-weight:700;font-size:1.08em;color:#fff;letter-spacing:0.5px;">RAM:</div>
+                </div>
+                <div class="gauge-col" style="margin-right:100px">
+                  <div id="gauge-temp" class="gauge"></div>
+                  <div class="gauge-info" id="temp-info" style="display:block;width:100%;text-align:center;font-family:'Montserrat','Roboto',Arial,sans-serif;font-weight:700;font-size:1.08em;color:#fff;letter-spacing:0.5px;">Top IP Quản trị</div>
+                </div>
+                <div class="gauge-col" style="margin-right:100px">
+                  <div id="gauge-virtual" class="gauge"></div>
+                  <div class="gauge-info" id="virtual-info" style="display:block;width:100%;text-align:center;font-family:'Montserrat','Roboto',Arial,sans-serif;font-weight:700;font-size:1.08em;color:#fff;letter-spacing:0.5px;">SWAP:</div>
+                </div>
+                <div class="gauge-col">
+                  <div id="gauge-disk" class="gauge"></div>
+                  <div class="gauge-info" id="disk-info" style="display:block;width:100%;text-align:center;font-family:'Montserrat','Roboto',Arial,sans-serif;font-weight:700;font-size:1.08em;color:#fff;letter-spacing:0.5px;">DISK SPACE:</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Các thông số chi tiết ở dưới các gauge -->
+            <div class="system-info-card" style="margin: 10px auto 0 auto; max-width: 1400px; background: #23252b; border-radius: 8px; box-shadow: 0 2px 8px #0002; padding: 32px 32px; color: #fff; font-family: 'Montserrat', 'Roboto', Arial, sans-serif;">
+              <div class="system-info-table">
+                <div>
+                  <div class="info-row"><span class="info-title">Tên thiết bị</span><span id="sys-hostname" class="info-value">...</span></div>
+                  <div class="info-row"><span class="info-title">Thời gian hiện tại</span><span id="sys-time" class="info-value">...</span></div>
+                  <div class="info-row"><span class="info-title">Thời gian hoạt động</span><span id="sys-uptime" class="info-value">...</span></div>
+                  <div class="info-row"><span class="info-title">Tải CPU trung bình</span><span id="sys-loadavg" class="info-value">...</span></div>
+                </div>
+                <div>
+                  <div class="info-row"><span class="info-title">Bộ nhớ RAM</span><span id="sys-ram" class="info-value">...</span></div>
+                  <div class="info-row"><span class="info-title">Dung lượng ổ đĩa</span><span id="sys-disk" class="info-value">...</span></div>
+                  <div class="info-row"><span class="info-title">Bộ nhớ SWAP</span><span id="sys-swap" class="info-value">...</span></div>
+                  <div class="info-row"><span class="info-title">Nhiệt độ CPU</span><span id="sys-temp" class="info-value">...</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial:../../partials/_footer.html -->
+          <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bmctech.vn 2024</span>
+              <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Security <a href="https://bmctech.vn/" target="_blank">BMC</a> from bmctech.vn</span>
+            </div>
+          </footer>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+
+
+
+    <!-- container-scroller -->
+    <!-- plugins:js -->
+    <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page -->
+    <script src="../../assets/vendors/chart.js/Chart.min.js"></script>
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script src="../../assets/js/off-canvas.js"></script>
+    <script src="../../assets/js/hoverable-collapse.js"></script>
+    <script src="../../assets/js/misc.js"></script>
+    <script src="../../assets/js/settings.js"></script>
+    <script src="../../assets/js/todolist.js"></script>
+    <script src="../assets/js/terminal.js"></script>
+    <!-- <script src="../assets/js/rulesCount.js"></script> -->
+    <script src="/assets/vendors/progressbar.js/progressbar.min.js"></script>
+    <script src="../assets/js/circleDashboard.js"></script>
+    <script src="../assets/js/checkram.js"></script>
+    <script src="../assets/js/checkCPU.js"></script>
+    <!-- <script src="../assets/js/checkha.js"></script> -->
+    <!-- <script src="../assets/js/countALLrule.js"></script>
+    <script src="../assets/js/checkLogDisk.js"></script> -->
+    <script src="../assets/js/checkTimehoatdong.js"></script>
+    <script src="../assets/js/tempCPU.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page -->
+    <!-- <script src="../../assets/js/chart.js"></script> -->
+    <!-- End custom js for this page -->
+  </body>
+</html>
+
+<style>
+.gauge-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+.gauge-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  gap: 32px;
+}
+.gauge-col {
+  margin-right: 0 !important;
+  margin-bottom: 32px;
+  flex: 1 1 240px;
+  max-width: 300px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gauge {
+  width: 180px;
+  height: 180px;
+  max-width: 100vw;
+}
+.gauge-info {
+  margin-top: 18px;
+  text-align: center;
+  font-family: 'Montserrat','Roboto',Arial,sans-serif;
+  font-weight: 700;
+  font-size: 1.08em;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.system-info-card {
+  margin: 10px auto 0 auto;
+  max-width: 1400px;
+  background: #23252b;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0002;
+  padding: 32px 32px;
+  color: #fff;
+  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
+}
+.system-info-table {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 0 96px;
+}
+.info-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+  min-height: 28px;
+}
+.info-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 1.08em;
+  letter-spacing: 0.5px;
+  min-width: 220px;
+  padding-right: 32px;
+  white-space: nowrap;
+}
+.info-value {
+  font-weight: 400;
+  color: #fff;
+  font-size: 1.08em;
+  word-break: break-all;
+  padding-left: 12px;
+}
+@media (max-width: 1400px) {
+  .gauge-row { gap: 18px; justify-content: space-between; }
+  .gauge-col { min-width: 180px; max-width: 220px; flex: 1 1 180px; }
+  .system-info-card { max-width: 98vw; padding: 24px 12px; }
+  .system-info-table { gap: 0 24px; }
+}
+@media (max-width: 1100px) {
+  .gauge-row { gap: 12px; }
+  .gauge-col { min-width: 140px; max-width: 180px; flex: 1 1 140px; }
+  .gauge { width: 140px; height: 140px; }
+  .system-info-card { padding: 16px 4px; }
+}
+@media (max-width: 900px) {
+  .gauge-row { gap: 8px; }
+  .gauge-col { min-width: 120px; max-width: 160px; flex: 1 1 120px; }
+  .gauge { width: 110px; height: 110px; }
+  .system-info-table { grid-template-columns: 1fr; gap: 0; }
+}
+@media (max-width: 600px) {
+  .gauge-row { flex-direction: column; gap: 0; }
+  .gauge-col { max-width: 100vw; min-width: 100px; margin-bottom: 18px; }
+  .gauge { width: 90px; height: 90px; }
+  .system-info-card { padding: 12px 2vw; }
+  .system-info-table { grid-template-columns: 1fr; gap: 0; }
+  .info-title { min-width: 100px; padding-right: 6px; }
+}
+</style>

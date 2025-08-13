@@ -1,0 +1,15 @@
+
+
+/* Tăng bề ngang cho dropdown */
+#deviceSelect {
+    width: auto;  /* Đảm bảo chiều rộng tự động để chứa hết giá trị đã chọn */
+    min-width: 289px;  /* Đặt chiều rộng tối thiểu cho dropdown */
+    max-width: 100%;  /* Đảm bảo dropdown không vượt quá chiều rộng của container */
+    padding: 5px;  /* Thêm một chút khoảng cách để không bị sát viền */
+    text-align: center;  /* Căn giữa giá trị đã chọn */
+}
+
+/* Tăng bề ngang cho các mục trong dropdown */
+#deviceSelect option {
+    padding: 10px;  /* Thêm khoảng cách giữa các mục */
+}

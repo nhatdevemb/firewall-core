@@ -1,0 +1,11 @@
+{
+  "default_policies": {"PREROUTING": "ACCEPT","INPUT": "ACCEPT","OUTPUT": "ACCEPT","POSTROUTING": "ACCEPT"},
+  "rules": {
+    "PREROUTING": [],
+    "INPUT": [],
+    "OUTPUT": [],
+    "FORWARD": [],
+    "POSTROUTING": [{"lineNumber": 1, "action": "SNAT", "details": "  SNAT       all  --  0.0.0.0/0            0.0.0.0/0            to:203.162.0.8"},{"lineNumber": 2, "action": "MASQUERADE", "details": "  MASQUERADE  all  --  0.0.0.0/0            0.0.0.0/0           "}]
+  },
+  "timestamp": "2025-04-17T11:50:52+0700"
+}

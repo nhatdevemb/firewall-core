@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Trình quản lý BMC IDS/IPS</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="../../assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End Plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+
+    <link rel="stylesheet" href="../../assets/css/style_capnhat.css">
+
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="../../assets/images/iconnho.png" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:../../partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+          <a class="sidebar-brand brand-logo" href="../../index.html"><img src="../../assets/images/IDDS.png" alt="logo" /></a>
+          <a class="sidebar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+        </div>
+        <ul class="nav">
+          <li class="nav-item profile">
+          </li>
+          <li class="nav-item nav-category">
+            <span class="nav-link">Navigation</span>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../index.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-speedometer"></i>
+              </span>
+              <span class="menu-title">Trang chủ</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+              <span class="menu-icon">
+                <i class="mdi mdi-laptop"></i>
+              </span>
+              <span class="menu-title">Rule Database</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="ui-basic">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="checkDatabase.html">Kiểm tra Database</a></li>
+                <li class="nav-item"> <a class="nav-link" href="suarule.html">Tìm và sửa Rules</a></li>
+                <li class="nav-item"> <a class="nav-link" href="capnhatrule.html">Cập nhật Rules</a></li>
+            </div>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="switchmode.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-playlist-play"></i>
+              </span>
+              <span class="menu-title">Chuyển chế độ IDS/IPS</span>
+            </a>
+          </li>
+          <!-- <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/forms/basic_elements.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-playlist-play"></i>
+              </span>
+              <span class="menu-title">Form Elements</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/tables/basic-table.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-table-large"></i>
+              </span>
+              <span class="menu-title">Tables</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/charts/chartjs.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-chart-bar"></i>
+              </span>
+              <span class="menu-title">Charts</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/icons/mdi.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-contacts"></i>
+              </span>
+              <span class="menu-title">Icons</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
+              <span class="menu-icon">
+                <i class="mdi mdi-security"></i>
+              </span>
+              <span class="menu-title">User Pages</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="auth">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/blank-page.html"> Blank Page </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html"> 404 </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-500.html"> 500 </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/login.html"> Login </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/register.html"> Register </a></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-file-document-box"></i>
+              </span>
+              <span class="menu-title">Documentation</span>
+            </a>
+          </li> -->
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
+              <span class="menu-icon">
+                <i class="mdi mdi-security"></i>
+              </span>
+              <span class="menu-title">Sửa cấu hình</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="auth">
+              <ul class="nav flex-column sub-menu">
+                <!-- <li class="nav-item"> <a class="nav-link" href="../../pages/samples/blank-page.html"> Blank Page </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html"> 404 </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-500.html"> 500 </a></li> -->
+                <li class="nav-item"> <a class="nav-link" href="/pages/ui-features/setting.html"> Config </a></li>
+                <!-- <li class="nav-item"> <a class="nav-link" href="../../pages/samples/register.html"> Register </a></li> -->
+              </ul>
+            </div>
+          </li>
+          <!-- <li class="nav-item menu-items">
+            <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-file-document-box"></i>
+              </span>
+              <span class="menu-title">Documentation</span>
+            </a>
+          </li> -->
+
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="javascript:void(0);" onclick="toggleFirewallPopup()">
+                <span class="menu-icon">
+                    <i class="mdi mdi-lock"></i> <!-- Thay icon phù hợp -->
+                </span>
+                <span class="firewall-menu-item"> 
+                    Yêu cầu truy cập mới 
+                    <span id="firewall-badge" class="firewall-badge">0</span>
+                </span>
+            </a>
+        </li>
+
+        <!-- Popup hiển thị request -->
+        <div id="firewall-popup-container" class="firewall-popup-overlay">
+            <div class="firewall-popup-content">
+                <!-- Header với nút đóng góc phải -->
+                <div class="firewall-popup-header">
+                    <span>New Firewall Requests</span>
+                </div>
+
+                <!-- Bảng hiển thị request -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th>Name</th> <!-- Thêm cột "Name" -->
+                        </tr>
+                    </thead>
+                    <tbody id="firewall-popup-table">
+                        <!-- Dữ liệu động sẽ được thêm vào đây -->
+                    </tbody>
+                </table>
+
+                <!-- Footer với 2 nút -->
+                <div class="firewall-popup-footer">
+                    <button class="firewall-log-btn">View Full Log</button>
+                    <button class="firewall-footer-close-btn" onclick="closeFirewallPopup()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 Popup View Full Log -->
+        <div id="firewall-full-log-container" class="firewall-popup-overlay">
+            <div class="firewall-popup-content">
+                <!-- Header -->
+                <div class="firewall-popup-header">
+                    <span>Firewall Full Log</span>
+                </div>
+
+                <!-- Bảng hiển thị log đầy đủ -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th>Name</th> <!-- Thêm cột "Name" -->
+                        </tr>
+                    </thead>
+                    <tbody id="firewall-full-log-table">
+                        <!-- 🔥 Dữ liệu từ file log sẽ được load vào đây -->
+                    </tbody>
+                </table>
+
+                <!-- Nút đóng -->
+                <div class="firewall-popup-footer">
+                    <button class="firewall-footer-close-btn" onclick="closeFullLogPopup()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="../../assets/js/firewall.js"></script>
+
+
+
+        <li class="nav-item menu-items">
+          <a class="nav-link" href="../../pages/tables/basic-table.html">
+            <span class="menu-icon">
+              <i class="mdi mdi-table-large"></i>
+            </span>
+            <span class="menu-title">Cách ly & Khôi phục</span>
+          </a>
+        </li>
+
+        <li class="nav-item menu-items">
+          <a class="nav-link" href="../tables/basic-table.html">
+            <span class="menu-icon">
+              <i class="mdi mdi-table-large"></i>
+            </span>
+            <span class="menu-title">Cách ly & Khôi phục</span>
+          </a>
+        </li>
+
+        <li class="nav-item menu-items">
+          <a class="nav-link" href="../firewall/firewall.html">
+            <span class="menu-icon">
+              <i class="mdi mdi-contacts"></i>
+            </span>
+            <span class="menu-title">Tường lửa</span>
+          </a>
+        </li>
+
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../login">
+              <span class="menu-icon">
+                <i class="mdi mdi-logout"></i>
+              </span>
+              <span class="menu-title">Đăng xuất</span>
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:../../partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+          <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+            <a class="navbar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+          </div>
+          <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+              <span class="mdi mdi-format-line-spacing"></span>
+            </button>
+          </div>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="row">
+
+            </div>
+            
+            <div class="row">
+              
+              <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="keyword" placeholder="Nhập msg của rule cần sửa" autocomplete="off">
+                    <button id="search-button">Tìm kiếm</button>
+                </div>
+                <!-- Hộp để hiển thị kết quả tìm kiếm -->
+                <div id="timvasua"></div>
+              </div>
+
+            <!-- Hướng dẫn sử dụng -->
+            <div id="guideText" class="guide-text">
+              <p><span class="guide-label">Hướng dẫn sử dụng:</span></p>
+              <ul>
+                <li>Điền <strong>MSG</strong> của rule mà bạn muốn chỉnh sửa vào ô tìm kiếm.</li>
+                <li>Kết hợp với hệ thống <strong>SIEM</strong>. Trên <strong>SIEM</strong>, các sự kiện (events) về việc ngăn chặn tấn công sẽ hiển thị <strong>MSG</strong> tương ứng với các rule đang được kích hoạt.</li>
+                <li>Nếu bạn muốn thay đổi trạng thái của rule này (chẳng hạn từ <strong>block</strong> sang <strong>Deactivate</strong> hoặc <strong>Alert</strong>), hãy sao chép <strong>MSG</strong> từ sự kiện trên <strong>SIEM</strong> và dán vào ô tìm kiếm.</li>
+                <li>Sau khi tìm thấy rule, bạn có thể chỉnh sửa theo nhu cầu, ví dụ như <strong>Deactivate</strong> rule hoặc thay đổi nó thành dạng <strong>Alert</strong>.</li>
+              </ul>
+              <p><span class="example-label">Ví dụ:</span> Hệ thống <strong>SIEM</strong> báo cáo sự kiện <strong>"ATTACK AD [PTsecurity] Suspicious Remote WMI Win32_Process create"</strong> đang ở trạng thái <strong>block</strong> và bạn cần sửa nó. Hãy copy "ATTACK AD [PTsecurity] Suspicious Remote WMI Win32_Process create" và tìm kiếm!.</p>
+            </div>
+
+
+
+            
+            <!-- Thêm script để sử dụng JavaScript cho tính năng tìm kiếm -->
+            <script src="../../assets/js/timvasuaRULE.js"></script>
+            
+            </div>
+          
+            
+      </nav>
+      <!-- partial -->
+
+      <!-- main-panel ends -->
+    </div>
+    <footer class="footer">
+      <div class="d-sm-flex justify-content-center justify-content-sm-between">
+        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bmctech.vn 2024</span>
+        <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Security <a href="https://bmctech.vn/" target="_blank">BMC</a> from bmctech.vn</span>
+      </div>
+    </footer>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="../../assets/js/off-canvas.js"></script>
+  <script src="../../assets/js/hoverable-collapse.js"></script>
+  <script src="../../assets/js/misc.js"></script>
+  <script src="../../assets/js/settings.js"></script>
+  <script src="../../assets/js/todolist.js"></script>
+  <script src="../../assets/js/rulesCount.js"></script>
+  <script src="../../assets/js/countALLrule.js"></script>
+  <script src="../../assets/js/last-update.js"></script>
+  <script src="../../assets/js/luutruMSG.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page -->
+  <script src="assets/js/dashboard.js"></script>
+  <!-- End custom js for this page -->
+</body>
+
+</html>

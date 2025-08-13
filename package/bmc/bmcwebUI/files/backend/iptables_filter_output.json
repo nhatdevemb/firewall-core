@@ -1,0 +1,11 @@
+{
+  "default_policies": {"INPUT": "ACCEPT","FORWARD": "ACCEPT","OUTPUT": "ACCEPT"},
+  "rules": {
+    "PREROUTING": [],
+    "INPUT": [],
+    "OUTPUT": [],
+    "FORWARD": [],
+    "POSTROUTING": []
+  },
+  "timestamp": "2025-07-10T23:37:10+0700"
+}

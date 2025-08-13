@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>So Sánh File .rules Từ Thiết Bị Từ Xa</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Liên kết tới file CSS -->
+</head>
+<body>
+    <h1>So Sánh File .rules Từ Thiết Bị Từ Xa</h1>
+    <div id="status-message"></div> <!-- Hiển thị thông báo trạng thái -->
+    <div id="file-list"></div> <!-- Danh sách các file .rules -->
+    <div id="log" class="log"></div> <!-- Khu vực hiển thị log lỗi -->
+
+    <script>
+        // Hàm tải danh sách file .rules từ server
+        async function fetchFileList() {
+            try {
+                document.getElementById('status-message').innerText = "Đang kết nối đến thiết bị từ xa...";
+                console.log("Đang tải danh sách file từ server...");
+
+                const response = await fetch('/api/files'); // Cập nhật URL cho API
+                const fileList = await response.json();
+                console.log("Danh sách file tải được:", fileList);
+
+                if (fileList.length === 0) {
+                    document.getElementById('file-list').innerHTML = "Không có file .rules nào để so sánh.";
+                    console.log("Không có file .rules nào để so sánh.");
+                    return;
+                }
+
+                // Hiển thị danh sách file
+                fileList.forEach(file => {
+                    console.log("Đang bắt đầu so sánh file:", file);
+                    compareFile(file); // Gọi hàm so sánh từng file
+                });
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách file:', error);
+                document.getElementById('log').innerHTML = 'Có lỗi khi tải danh sách file từ thiết bị từ xa.';
+                document.getElementById('status-message').innerText = "Lỗi kết nối SSH tới thiết bị từ xa!";
+                console.log("Lỗi kết nối hoặc lỗi khi tải danh sách file:", error);
+            }
+        }
+
+        // Hàm so sánh từng file
+// Hàm so sánh từng file
+// Hàm so sánh từng file
+async function compareFile(localFile) {
+    const progressBarContainer = document.createElement('div');
+    progressBarContainer.classList.add('file-comparison');
+   
+    const progressLabel = document.createElement('div');
+    progressLabel.innerHTML = 'Đang so sánh file: <span class="file-name">' + localFile + '</span>';
+
+    const progressBar = document.createElement('div');
+    progressBar.classList.add('progress');
+    const progressBarInner = document.createElement('div');
+    progressBarInner.classList.add('progress-bar');
+    progressBar.appendChild(progressBarInner);
+    progressBarContainer.appendChild(progressLabel);
+    progressBarContainer.appendChild(progressBar);
+    document.getElementById('file-list').appendChild(progressBarContainer);
+    
+    try {
+        const response = await fetch(`/api/compare/${localFile}`);
+        
+        // Kiểm tra xem phản hồi có phải là JSON hợp lệ không
+        if (!response.ok) {
+            throw new Error('Lỗi từ server');
+        }
+
+        const data = await response.json();  // Đảm bảo phản hồi là JSON
+       
+
+        progressBarInner.style.width = '100%';
+
+        const message = document.createElement('div');
+
+        message.innerHTML = `File ${localFile}: ${data.message}`;
+        
+        progressBarContainer.appendChild(message);
+        
+        
+        // if (data.status === 'Changed') {
+        //     message.innerHTML = `File ${localFile}: ${data.message}`;
+        // } else {
+        //     message.innerHTML = `Lỗi khi so sánh file ${localFile}: ${data.message}`;
+        // }
+
+        
+        if (data.status === 'Changed' && data.diff && data.diff.length > 0) {
+                    const diffList = document.createElement('ul');
+
+                    // Thêm dòng trống trước khi bắt đầu hiển thị danh sách sự khác biệt
+                    const lineBreak = document.createElement('br');
+                    diffList.appendChild(lineBreak);
+
+                    data.diff.forEach(diff => {
+                        const listItem = document.createElement('li');
+                        
+                        
+        // Hàm tách chuỗi thành các trường dựa trên dấu cách
+        const extractFields = (rule) => {
+            // Tách chuỗi thành các trường, mỗi trường là một phần tử trong mảng
+            // Tách chuỗi thành các trường và loại bỏ dấu ;
+            return rule.split(/\s+/).map(field => field.replace(/;$/, '').trim());
+        };
+
+        // Tách các trường từ Local và Remote
+        const localFields = extractFields(diff.local);
+        const remoteFields = extractFields(diff.remote);
+        
+        // Tạo chuỗi sự khác biệt giữa Local và Remote
+        let diffString = '';
+        const differences = [];
+
+        // Duyệt qua từng trường và so sánh Local và Remote
+        const maxLength = Math.max(localFields.length, remoteFields.length);
+        for (let i = 0; i < maxLength; i++) {
+            const localField = localFields[i] || '';  // Nếu không có giá trị thì gán là chuỗi rỗng
+            const remoteField = remoteFields[i] || '';  // Nếu không có giá trị thì gán là chuỗi rỗng
+
+            // Nếu các trường khác nhau, ghi nhận sự khác biệt
+            if (localField !== remoteField) {
+                differences.push(`${localField} -> ${remoteField}`);
+            }
+        }
+
+        // Nếu có sự khác biệt, nối các trường lại bằng dấu chấm phẩy
+        if (differences.length > 0) {
+            diffString = `Local -> Remote: ${differences.join('; ')};`;
+        } else {
+            diffString = 'Không có sự khác biệt rõ ràng';
+        }
+
+        // Chèn nội dung vào trong phần tử
+        listItem.innerHTML = `  
+            <b>SID: ${diff.SID}</b><br>
+            <div class="diff-container">
+                <div class="diff-item">
+                    <span class="label">Local:</span>
+                    <span class="diff-local">${diff.local}</span>
+                </div>
+                <div class="diff-item">
+                    <span class="label">Remote:</span>
+                    <span class="diff-remote">${diff.remote}</span>
+                </div>
+                <div class="diff-item">
+                    <span class="label diff-difference">Sự khác biệt:</span><br>
+                    <span class="diff-difference">${diffString}</span>
+                </div>
+            </div>`;
+        diffList.appendChild(listItem);
+    });
+
+    progressBarContainer.appendChild(diffList);
+        }
+
+    } catch (error) {
+        console.error('Lỗi khi so sánh file:', error);
+        progressBarInner.style.width = '100%';
+        const message = document.createElement('div');
+        message.innerHTML = `Có lỗi khi so sánh file ${localFile}. Lỗi: ${error.message}`;
+        progressBarContainer.appendChild(message);
+    }
+}
+        // Gọi hàm để tải danh sách file khi trang được tải
+        fetchFileList();
+    </script>
+</body>
+</html>

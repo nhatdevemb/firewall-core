@@ -1,0 +1,336 @@
+
+/* Container chính */
+.iptables-container {
+    background-color: #1e1e1e;
+    color: #ddd;
+    padding: 20px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+/* Header - Chọn bảng IPTABLE */
+.iptables-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #282828;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+/* Set Default Action */
+.iptables-header label {
+    font-weight: bold;
+    font-size: 16px;
+    white-space: nowrap;
+    padding: 6px 20px;
+/*    border: 1px solid rgba(255, 255, 255, 0.3); Viền chỉ bao quanh label*/
+    border-radius: 4px;
+/*    background: #2a2a2a; */
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    margin-left: 60px;
+}
+
+.iptables-header select,
+.new-chain-input {
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+    background: #666666;
+    color: white;
+    font-size: 13px;
+    outline: none;
+}
+
+.new-chain-input {
+    width: 400px;
+    margin-left: 250px; /* Đẩy nút về bên phải */
+}
+
+/* Sections */
+.iptables-section {
+    background: #2e2e2e;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+
+
+/* Header trong section */
+.iptables-section h5 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.iptables-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Căn đều các phần tử */
+    width: 100%;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+/* Set Default Action */
+.iptables-row label {
+    font-weight: bold;
+    font-size: 13px;
+    white-space: nowrap;
+    padding: 6px 20px;
+/*    border: 1px solid rgba(255, 255, 255, 0.3); Viền chỉ bao quanh label*/
+    border-radius: 4px;
+/*    background: #2a2a2a; */
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+}
+
+/* Dropdown */
+.iptables-row select {
+    padding: 6px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #3a3a3a;
+    color: white;
+    font-size: 12px;
+    outline: none;
+    width: 82px; /* Giữ kích thước hợp lý */
+
+    display: flex;
+    align-items: center;
+}
+
+/* Căn nút Add Rule về bên phải */
+.iptables-row .add-rule-btn {
+    background: #3a3a3a;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: 0.2s;
+    min-width: 32px;
+    text-align: center;
+    margin-left: auto; /* Đẩy nút về bên phải */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iptables-row .add-rule-btn:hover {
+    background: #444;
+}
+
+/* Bảng Rules */
+.iptables-table-container {
+    overflow-x: auto;
+    margin-top: 10px;
+    overflow-y: auto; /* Thêm thanh cuộn dọc */
+    max-height: 800px; /* Điều chỉnh chiều cao tối đa theo nhu cầu */
+}
+
+.iptables-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #3c4252;
+    border-radius: 5px;
+    font-size: 12px; /* text trong bang */
+}
+
+.iptables-table th,
+.iptables-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.iptables-table th {
+    background: #333;
+    color: #bbb;
+    font-size: 14px;
+    font-weight: normal;
+    position: sticky;
+    top: 0;
+}
+
+/* Nút Action */
+.iptables-action-buttons {
+    display: flex;
+    justify-content: center;  /* Căn giữa các nút */
+    gap: 10px;
+    margin-top: 10px;
+    margin-left: 320px;
+}
+
+/* Buttons */
+button {
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    font-size: 13px;
+    transition: background 0.2s ease-in-out;
+    
+}
+
+.iptables-btn {
+    background: #3a3a3a;
+    color: white;
+/*    border: 1px solid rgba(255, 255, 255, 0.1); */
+    margin-bottom: 10px;
+}
+
+.iptables-btn:hover {
+    background: #444;
+}
+
+.iptables-btn-danger {
+    background: #fa5e59;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.iptables-btn-danger:hover {
+    background: #c9302c;
+}
+
+.iptables-save-btn {
+    background: #5cb85c;
+    color: white;
+    font-weight: bold;
+    width: 100%;
+    padding: 10px;
+}
+
+.iptables-save-btn:hover {
+    background: #4cae4c;
+}
+
+/* Save Configuration Section */
+.iptables-save-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Đẩy về bên phải */
+    gap: 10px;
+    background: #1e1e1e;
+    padding: 10px; /* Giảm padding để bớt chiếm không gian */
+    border-radius: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Nút Save Configuration */
+.iptables-save-btn {
+    background: #4f5ea5; /* Giữ màu xanh nhưng tinh tế hơn */
+    color: white;
+    font-weight: bold;
+    padding: 8px 20px; /* Giảm padding để bớt thô */
+    border-radius: 4px;
+    font-size: 12px; /* Thu nhỏ chữ để phù hợp */
+    border: 0.5px solid rgba(255, 255, 255, 0.3); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Khoảng cách giữa icon và chữ */
+    transition: background 0.2s ease-in-out;
+    min-width: 180px; /* Đặt độ rộng tối thiểu */
+    max-width: 180px; /* Giữ kích thước vừa phải */
+    text-align: center;
+}
+
+.iptables-save-btn:hover {
+    background: hsl(221, 55%, 23%); /* Màu hover nhấn mạnh hơn */
+}
+
+/* Chữ mô tả nhỏ hơn và căn thẳng hàng */
+.iptables-save-container span {
+    font-size: 12px;
+    color: #bbb;
+    text-align: right;
+    max-width: 250px; /* Giới hạn chiều rộng */
+}
+
+
+
+/* Đặt kiểu cho thanh tiến trình ngang */
+#loading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background-color: #f1f1f1;  /* Màu nền thanh tiến trình */
+    z-index: 9999; /* Đảm bảo thanh tiến trình hiển thị trên tất cả các phần khác */
+}
+
+#progress-bar {
+    height: 100%;
+    background-color: #4caf50; /* Màu của thanh tiến trình */
+    width: 0%; /* Bắt đầu với chiều rộng bằng 0% */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Sử dụng Flexbox cho hàng */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+}
+
+/* Điều chỉnh khoảng cách của cột */
+.col-md-12 {
+    padding: 0 15px;
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+/* Card: khung bao quanh nội dung */
+.card {
+
+    border: 1px solid #979797;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+/* Card body: padding và căn chỉnh nội dung */
+.card-body {
+    padding: 20px;
+}
+
+/* Tiêu đề card: sắp xếp icon và text theo hàng ngang */
+.card-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Tiêu đề chữ được bọc trong span đã có màu và kích thước riêng */
+.card-title span {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+
+
+

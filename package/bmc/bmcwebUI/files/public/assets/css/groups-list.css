@@ -1,0 +1,20 @@
+/* CSS cho màu sắc của các biểu tượng trạng thái */
+.text-green {
+    color: #28a745; /* Xanh lá cây - trạng thái thành công */
+}
+
+.text-yellow {
+    color: #f1c40f; /* Vàng - trạng thái sử dụng bản sao cục bộ */
+}
+
+.text-orange {
+    color: #f39c12; /* Cam - trạng thái cảnh báo */
+}
+
+.text-red {
+    color: #dc3545; /* Đỏ - trạng thái lỗi */
+}
+
+.text-gray {
+    color: #7f8c8d; /* Xám - trạng thái không xác định */
+}

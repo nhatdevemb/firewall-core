@@ -1,0 +1,181 @@
+/* Đặt nền tối cho overlay */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Căn chỉnh popup nội dung */
+.popup-content {
+    background: #ffffff;
+    width: 540px; /* Tăng chiều rộng popup */
+    padding: 30px; /* Tăng khoảng cách nội dung */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Tiêu đề của popup */
+.popup-content h3 {
+    margin: 0 0 25px;
+    font-size: 30px; /* Tăng kích thước tiêu đề */
+    color: #333333;
+    font-weight: bold;
+}
+
+/* Đoạn văn bản trong popup */
+.popup-content p {
+    margin: 12px 0;
+    color: #555555;
+    font-size: 22px; /* Tăng kích thước chữ */
+    line-height: 1.8; /* Tăng khoảng cách dòng */
+}
+
+/* Highlight text */
+.popup-content .highlight {
+    color: #007BFF;
+    font-weight: bold;
+    font-size: 18px; /* Tăng kích thước chữ của highlight */
+}
+
+/* Container cho file upload */
+.file-upload-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px; /* Tăng khoảng cách giữa các phần tử */
+    margin: 20px 0;
+}
+
+/* Input file */
+#fileInputPopup {
+    width: 220px; /* Tăng chiều rộng khung */
+    padding: 6px 10px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    font-size: 16px; /* Tăng kích thước chữ */
+    cursor: pointer;
+}
+
+/* Hiển thị tên file */
+#selectedFileNamePopup {
+    font-size: 16px; /* Tăng kích thước chữ */
+    color: #555555;
+    margin-left: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px; /* Tăng giới hạn chiều rộng tên file */
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Nút trong popup */
+.popup-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px; /* Tăng khoảng cách trên */
+    gap: 20px; /* Tăng khoảng cách giữa các nút */
+}
+
+.popup-buttons button {
+    flex: 1;
+    padding: 14px 0; /* Tăng chiều cao nút */
+    border: none;
+    border-radius: 8px; /* Tăng góc bo */
+    font-size: 16px; /* Tăng kích thước chữ */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Nút xác nhận */
+#updateConfirmButton {
+    background-color: #007BFF;
+    color: #ffffff;
+    border: 1px solid transparent;
+}
+
+#updateConfirmButton:disabled {
+    background-color: #cccccc;
+    border: 1px solid #cccccc;
+    cursor: not-allowed;
+}
+
+/* Nút đóng */
+#closePopupButton {
+    background-color: #f5f5f5;
+    color: #333333;
+    border: 1px solid #cccccc;
+}
+
+#closePopupButton:hover {
+    background-color: #e4e4e4;
+    border-color: #bbbbbb;
+}
+
+/* Hiệu ứng hover */
+.popup-buttons button:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+/* Hiển thị trên màn hình nhỏ */
+@media (max-width: 480px) {
+    .popup-content {
+        width: 95%;
+        padding: 25px;
+    }
+
+    #selectedFileNamePopup {
+        max-width: 120px; /* Điều chỉnh cho màn hình nhỏ */
+    }
+}
+
+/* Thông báo trạng thái */
+#updateStatusMessage {
+    display: none;
+    margin-top: 10px;
+    font-size: 18px; /* Tăng kích thước chữ */
+    font-weight: bold; /* Tăng độ đậm */
+    text-align: center;
+  }
+
+
+
+/* Popup dành cho bản cập nhật mới */
+#popup-update .popup-content {
+    background-color: #f7f7f7;
+    width: 500px;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Nút xác nhận */
+#popup-update #updateConfirmButton {
+    background-color: #28a745; /* Màu xanh cho nút xác nhận */
+    color: #ffffff;
+}
+
+/* Nút hủy bỏ */
+#popup-update #closePopupButton {
+    background-color: #f44336; /* Màu đỏ cho nút hủy bỏ */
+    color: #ffffff;
+}
+
+
+
+
+
+
+
+  
+  

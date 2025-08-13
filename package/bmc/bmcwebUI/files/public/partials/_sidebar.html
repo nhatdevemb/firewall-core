@@ -1,0 +1,221 @@
+
+<link rel="stylesheet" href="/assets/css/truycapmoi.css">
+<link rel="stylesheet" href="/assets/css/sidebar.css">
+
+<!-- _sidebar.html -->
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+      <a class="sidebar-brand brand-logo" href="../../index.html"><img src="../../assets/images/logoFirewall.png" alt="logo" /></a>
+      <a class="sidebar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/IDDS.png" alt="logo" /></a>
+  </div>
+  <ul class="nav">
+      <li class="nav-item profile">
+      </li>
+      <li class="nav-item nav-category">
+          <span class="nav-link">Thanh điều hướng</span>
+      </li>
+      <li class="nav-item menu-items">
+          <a class="nav-link" href="/index.html">
+              <span class="menu-icon">
+                  <i class="mdi mdi-speedometer" style="color: #2ecc71;"></i>  <!-- Xanh lá tươi -->
+              </span>
+              <span class="menu-title">Trang chủ</span>
+          </a>
+      </li>
+      <li class="nav-item menu-items">
+          <a class="nav-link" href="/pages/firewall/firewall.html">
+              <span class="menu-icon">
+                  <i class="mdi mdi-contacts" style="color: #e74c3c;"></i>     <!-- Đỏ tươi -->
+              </span>
+              <span class="menu-title">Luật áp dụng</span>
+          </a>
+      </li>
+      <li class="nav-item menu-items">
+          <a class="nav-link" href="/pages/charts/chartjs.html">
+              <span class="menu-icon">
+                  <i class="mdi mdi-chart-bar" style="color: #f1c40f;"></i>    <!-- Vàng tươi -->
+              </span>
+              <span class="menu-title">Hành vi truy cập</span>
+          </a>
+      </li>
+      <li class="nav-item menu-items">
+          <a class="nav-link" href="/pages/quaratine/quaratine.html">
+              <span class="menu-icon">
+                  <i class="mdi mdi-table-large" style="color: #e91e63;"></i>  <!-- Hồng đậm -->
+              </span>
+              <span class="menu-title">Cách ly & Khôi phục</span>
+          </a>
+      </li>
+
+      <li class="nav-item menu-items">
+          <a class="nav-link" href="/pages/clamav/clamav.html">
+              <span class="menu-icon">
+                  <i class="mdi mdi-playlist-play" style="color: #3498db;"></i> <!-- Xanh dương tươi -->
+              </span>
+              <span class="menu-title">Quản lý chống virus</span>
+          </a>
+      </li>
+
+      <li class="nav-item menu-items">
+        <a class="nav-link" href="/pages/web_filter/web_filter.html">
+            <span class="menu-icon">
+                <i class="mdi mdi-web-box" style="color: #e67e22;"></i>      
+            </span>
+            <span class="menu-title">Chặn truy cập web</span>
+            <div class="stats-container">
+                <span class="label bg-red" id="num_denied" title=""></span>
+                <span class="label bg-green" id="num_allowed" title=""></span>
+            </div>
+        </a>
+    </li>
+
+    <li class="nav-item menu-items">
+        <a class="nav-link" href="/pages/ad_blocker/ad_blocker.html">
+            <span class="menu-icon">
+                <i class="mdi mdi-block-helper" style="color: #e2518e;"></i>     
+            </span>
+            <span class="menu-title">Domain độc hại</span>
+            <div class="stats-container">
+                <span class="label bg-orange" id="num_gravity" title="Tổng số tên miền quảng cáo đang chặn"></span>
+                <span class="label bg-blue" id="num_lists" title="Số lượng danh sách đang Active"></span>
+            </div>
+        </a>
+    </li>
+
+      <li class="nav-item menu-items">
+          <a class="nav-link" href="javascript:void(0);" onclick="toggleFirewallPopup()">
+              <span class="menu-icon">
+                <i class="mdi mdi-lock" style="color: #9b59b6;"></i>         <!-- Tím đậm -->
+              </span>
+              <span class="menu-title">Yêu cầu truy cập mới</span>
+                  <span id="firewall-badge" class="firewall-badge">0</span>
+                  <span id="user-firewall-badge" class="firewall-badge">0</span>
+              </span>
+          </a>
+      </li>
+      <!-- Popup hiển thị request -->
+      <div id="firewall-popup-container" class="firewall-popup-overlay">
+          <div class="firewall-popup-content">
+              <div class="firewall-popup-header">
+                  <span>Yêu cầu truy cập mới tới BMC Network</span>
+              </div>
+              <div class="popup-sections">
+                  <div class="popup-section" id="mac-logs-section">
+                      <h4>Yêu cầu qua địa chỉ MAC</h4>
+                      <table>
+                          <thead>
+                              <tr>
+                                  <th>Địa chỉ MAC</th>
+                                  <th>Trạng thái</th>
+                                  <th>Thời gian</th>
+                                  <th>Địa chỉ IP</th>
+                                  <th>Nguyên nhân</th>
+                              </tr>
+                          </thead>
+                          <tbody id="firewall-popup-table-mac">
+                              <!-- Dữ liệu động cho MAC logs sẽ được thêm vào đây -->
+                          </tbody>
+                      </table>
+                  </div>
+                  <div class="popup-section" id="username-logs-section">
+                      <h4>Yêu cầu qua Tên đăng nhập/ Mật khẩu</h4>
+                      <table>
+                          <thead>
+                              <tr>
+                                  <th>Tên đăng nhập</th>
+                                  <th>Trạng thái</th>
+                                  <th>Thời gian</th>
+                                  <th>Địa chỉ IP</th>
+                                  <th>Nguyên nhân</th>
+                              </tr>
+                          </thead>
+                          <tbody id="firewall-popup-table-username">
+                              <!-- Dữ liệu động cho User logs sẽ được thêm vào đây -->
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+              <div class="firewall-popup-footer">
+                  <button class="firewall-log-btn">Xem full log</button>
+                  <button class="firewall-footer-close-btn" onclick="closeFirewallPopup()">Close</button>
+              </div>
+          </div>
+      </div>
+      <script src="/assets/js/firewall.js"></script>
+
+
+
+      <li class="nav-item menu-items">
+          <a class="nav-link" href="../login">
+              <span class="menu-icon">
+                  <i class="mdi mdi-logout" style="color: #2849db;"></i>
+              </span>
+              <span class="menu-title">Đăng xuất</span>
+          </a>
+      </li>
+
+
+      <li class="nav-item menu-items">
+        <a class="nav-link" href="javascript:void(0);" onclick="unlinkDevice()">
+            <span class="menu-icon">
+                <i class="mdi mdi-link-off" style="color: #f00b0b;"></i>
+            </span>
+            <span class="menu-title">Hủy liên kết</span>
+        </a>
+    </li>
+
+
+  </ul>
+<script src="/assets/js/unlink-device.js"></script>
+</nav>
+
+<div id="unlink-popup-container" class="unlink-popup-overlay" style="display:none;">
+    <div class="unlink-popup-content">
+        <div id="device-info" style="display: none;" data-device-id=""></div>
+        <div class="unlink-popup-header">
+            <strong id="device-name"></strong>
+            <br>
+            <span>Bạn có chắc chắn muốn hủy liên kết thiết bị này không?</span>
+        </div>
+        <div class="unlink-popup-footer">
+            <button class="unlink-confirm-btn" onclick="confirmUnlink()">Xác nhận</button>
+            <button class="unlink-cancel-btn" onclick="closeUnlinkPopup()">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="/assets/js/pihole-session.js"></script>
+<script type="module" src="/assets/js/sidebar_info.js"></script>
+
+
+<style>
+    .unlink-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .unlink-popup-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .unlink-popup-header {
+        margin-bottom: 20px;
+    }
+    .unlink-popup-footer {
+        display: flex;
+        justify-content: center;
+    }
+    .unlink-confirm-btn, .unlink-cancel-btn {
+        margin-left: 10px;
+    }
+</style>
+
+

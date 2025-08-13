@@ -1,0 +1,174 @@
+/* Styles for the entire container */
+.switchmode-container {
+    margin-top: -20px;
+}
+/* Isolated styles for dropdown */
+.switchmode-container .switchmode-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9em;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #333333;
+    appearance: none;
+}
+
+.switchmode-container .switchmode-select:focus {
+    border-color: #ff7f50;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 127, 80, 0.5);
+}
+
+.switchmode-container .switchmode-select option {
+    background-color: #ffffff;
+    color: #333333;
+}
+
+.switchmode-container .switchmode-select option:hover {
+    background-color: #ff7f50;
+    color: #ffffff;
+}
+
+.switchmode-container .switchmode-select option:checked {
+    background-color: #ff7f50;
+    color: #ffffff;
+}
+
+/* Isolated card styles */
+.switchmode-container .switchmode-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.switchmode-container .switchmode-card .card-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333333;
+}
+
+/* Isolated table styles */
+.switchmode-container .switchmode-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+    background-color: transparent;
+}
+
+.switchmode-container .switchmode-table th,
+.switchmode-container .switchmode-table td {
+    text-align: left;
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.switchmode-container .switchmode-table thead th {
+    background-color: #ff7f50;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.switchmode-container .switchmode-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.switchmode-container .switchmode-table th input[type="checkbox"],
+.switchmode-container .switchmode-table td input[type="checkbox"] {
+    cursor: pointer;
+}
+
+/* Isolated button styles */
+.switchmode-container .switchmode-apply-btn {
+    background-color: #ff7f50;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.switchmode-container .switchmode-apply-btn:hover {
+    background-color: #e06639;
+}
+
+/* Responsive styles for isolated container */
+@media (max-width: 768px) {
+    .switchmode-container .switchmode-card {
+        padding: 15px;
+    }
+
+    .switchmode-container .bulk-action-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .switchmode-container .bulk-action-row .form-control {
+        margin-bottom: 10px;
+    }
+
+    .switchmode-container .switchmode-apply-btn {
+        width: 100%;
+    }
+}
+
+
+.pagination-controls button {
+    min-width: 40px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+
+.pagination-controls button.active {
+    background-color: #ff7f50;
+    color: #ffffff;
+}
+
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    top: 835px;
+    right: 730px;
+    z-index: 9999;
+}
+
+/* Toast Message */
+.toast-message {
+    background-color: #4caf50; /* Màu nền (success) */
+    color: #fff; /* Màu chữ */
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+    opacity: 1;
+    transform: translateY(0);
+    animation: slideIn 0.5s, fadeOut 5s 4.5s forwards;
+}
+
+/* Slide In Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade Out Animation */
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}

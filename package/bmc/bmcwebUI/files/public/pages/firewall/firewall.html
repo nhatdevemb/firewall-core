@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Trình quản lý BMC IDS/IPS</title>
+
+
+  <!-- plugins:css -->
+    <!-- Thêm CSS của DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- Thêm jQuery từ CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <!-- Thêm DataTables JS từ CDN -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
+
+    <link rel="stylesheet" href="../../assets/css/style_capnhat.css">
+    <link rel="stylesheet" href="../../assets/css/capnhat.css">
+    <link rel="stylesheet" href="../../assets/css/importrules.css">
+    <!-- <link rel="stylesheet" href="../../assets/css/updatePopup.css"> -->
+    <link rel="stylesheet" href="../../assets/css/iptables.css">
+    <link rel="stylesheet" href="../../assets/css/iptables1.css">
+
+    
+
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="../../assets/images/iconnho.png" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <div id="sidebar-container"></div>
+      <script>
+          $(document).ready(function() {
+              $('#sidebar-container').load("../../partials/_sidebar.html");
+          });
+      </script>
+    </div>
+
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:../../partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+          <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+            <a class="navbar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+          </div>
+          <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+              <span class="mdi mdi-format-line-spacing"></span>
+            </button>
+          </div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-md-12 grid-margin stretch-card">
+                        <div class="card switchmode-card">
+                            <div class="card-body">
+                                <h4 class="card-title">Cấu hình Rules BMC Firwall</h4>
+                                <hr class="divider">
+
+
+
+<!-- 
+                                <div class="iptables-container">
+                                  
+                                  <div class="iptables-header">
+                                      <label>Chọn bảng:</label>
+                                      <select id="iptables-select">
+                                          <option value="filter">Packet filtering (filter)</option>
+                                          <option value="mangle">Packet alteration (mangle)</option>
+                                          <option value="nat">Network Address Translation (nat)</option>
+                                      </select>
+                                      <input type="text" class="new-chain-input" placeholder="Add a new chain named:">
+                                      <button class="iptables-btn add-chain-btn">Add Rule</button>
+                                  </div>
+                              
+                                  
+                                  <div class="iptables-section input">
+                                      <h5 style="color: #3b82f6; border-left: 4px solid #3b82f6; padding-left: 8px;">
+                                          Incoming packets (INPUT) - Áp dụng với các gói tin tới Firewall
+                                      </h5>
+                                      <p>Không có rules nào được chỉ định trong chain này</p>
+                                      <div class="iptables-row">
+                                          <div class="iptables-label">
+                                              <label>Set Default Action To:</label>
+                                          </div>
+                                          <select class="default-action-input" id="input-default-action">
+                                              <option>ACCEPT</option>
+                                              <option>DROP</option>
+                                              <option>REJECT</option>
+                                          </select>
+                                          <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                      </div>
+                                  </div>
+                              
+                                  
+                                  <div class="iptables-section">
+                                      <h5 style="color: #f97316; border-left: 4px solid #f97316; padding-left: 8px;">
+                                          Forwarded packets (FORWARD) - Áp dụng với các gói tin đi qua Firewall
+                                      </h5>
+                                      <div class="iptables-table-container">
+                                          <table class="iptables-table">
+                                              <thead>
+                                                  <tr>
+                                                      <th><input type="checkbox"></th>
+                                                      <th>Action</th>
+                                                      <th>Condition</th>
+                                                      <th>Comment</th>
+                                                      <th>Move</th>
+                                                      <th>Add</th>
+                                                  </tr>
+                                              </thead>
+                                              <tbody id="forward-rules">
+                                                  
+                                              </tbody>
+                                          </table>
+                                      </div>
+                                      <div class="iptables-row">
+                                          <div class="iptables-label">
+                                              <label>Set Default Action To:</label>
+                                          </div>
+                                          <select class="default-action-input" id="forward-default-action">
+                                              <option>ACCEPT</option>
+                                              <option>DROP</option>
+                                              <option>REJECT</option>
+                                          </select>
+                                          <div class="iptables-action-buttons">
+                                              <button class="iptables-btn-danger">Delete Selected</button>
+                                              <button class="iptables-btn">Move Selected</button>                  
+                                          </div>
+                                          <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                      </div>
+                                  </div>
+                              
+                                  
+                                  <div class="iptables-section">
+                                      <h5 style="color: #a855f7; border-left: 4px solid #a855f7; padding-left: 8px;">
+                                          Outgoing packets (OUTPUT) - Áp dụng với các gói tin tạo bởi Firewall
+                                      </h5>
+                                      <p>Không có rules nào được chỉ định trong chain này</p>
+                                      <div class="iptables-row">
+                                          <div class="iptables-label">
+                                              <label>Set Default Action To:</label>
+                                          </div>
+                                          <select class="default-action-input" id="output-default-action">
+                                              <option>ACCEPT</option>
+                                              <option>DROP</option>
+                                              <option>REJECT</option>
+                                          </select>
+                                          <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                      </div>
+                                  </div>
+                              
+                                  
+                                  <div class="iptables-save-container">
+                                      <button class="iptables-save-btn">💾 Save Configuration</button>
+                                      <span>Nhấn vào nút này để lưu cấu hình trên vào tệp cấu hình BMC Firewall</span>
+                                  </div>
+                              </div>
+                              
+                              <script src="../../assets/js/getiptables.js"></script> -->
+                              <!-- Thanh tiến trình ngang -->
+                              <div id="loading-progress" style="display: none;">
+                                <div id="progress-bar" style="width: 0%;"></div>
+                              </div>
+                              
+
+                              <div class="iptables-container">
+                              <!-- Progress bar hiển thị ngay dưới bảng -->
+                              <div id="progress-container" class="progress-container" style="display: none; margin-top: 10px;">
+                                <div id="progress-bar" class="progress-bar"></div>
+                              </div>
+
+                                <!-- Chọn bảng IPTABLE -->
+                                <div class="iptables-header">
+                      
+                                    <label>Chọn bảng:</label>
+                                    <select id="iptables-select">
+                                        <option value="filter">Packet filtering (filter)</option>
+                                        <option value="mangle">Packet alteration (mangle)</option>
+                                        <option value="nat">Network Address Translation (nat)</option>
+                                    </select>
+                                    <input type="text" class="new-chain-input" placeholder="Add a new chain named:">
+                                    <button class="iptables-btn add-chain-btn">Add Rule</button>
+                                </div>
+                            
+                                <!-- Chain INPUT -->
+                                <div class="iptables-section input"  style="display: none;">
+                                    <h5 style="color: #3b82f6; border-left: 4px solid #3b82f6; padding-left: 8px;">
+                                        Incoming packets (INPUT) - Áp dụng với các gói tin tới Firewall
+                                    </h5>
+                                    <p>Không có rules nào được chỉ định trong chain này</p>
+                                    <div class="iptables-table-container">
+                                        <table class="iptables-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><input type="checkbox"></th>
+                                                    <th>Action</th>
+                                                    <th>Condition</th>
+                                                    <th>Comment</th>
+                                                    <th>Move</th>
+                                                    <th>Add</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="input-rules">
+                                                <!-- Rules from API will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Progress bar hiển thị ngay dưới bảng -->
+                                    <div id="progress-container" class="progress-container" style="display: none; margin-top: 10px;">
+                                      <div id="progress-bar" class="progress-bar"></div>
+                                    </div>
+
+
+                                    <div class="iptables-row">
+                                        <div class="iptables-label">
+                                            <label>Set Default Action To:</label>
+                                        </div>
+                                        <select class="default-action-input" id="input-default-action">
+                                            <option>ACCEPT</option>
+                                            <option>DROP</option>
+                                            <option>REJECT</option>
+                                        </select>
+                                        <div class="iptables-action-buttons" id="input-action-buttons" style="display: none;">
+                                          <!-- These buttons will be hidden by default and shown when rules are available -->
+                                            <!-- These buttons will be hidden by default and shown when rules are available -->
+                                            <button class="iptables-btn-danger" id="delete-btn">
+                                              <span id="loading-spinner-input" style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                              <!-- <span id="success-icon" style="display:none; color: green;">✔</span> -->
+                                              Delete Selected
+                                            </button>
+                                          <button class="iptables-btn">Move Selected</button>
+                                        </div>
+                                        <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                    </div>
+                                </div>
+                            
+                                <!-- Chain FORWARD -->
+                                <div class="iptables-section forward"  style="display: none;">
+                                    <h5 style="color: #f97316; border-left: 4px solid #f97316; padding-left: 8px;">
+                                        Forwarded packets (FORWARD) - Áp dụng với các gói tin đi qua Firewall
+                                    </h5>
+                                    <div class="iptables-table-container">
+                                        <table class="iptables-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><input type="checkbox"></th>
+                                                    <th>Action</th>
+                                                    <th>Condition</th>
+                                                    <th>Comment</th>
+                                                    <th>Move</th>
+                                                    <th>Add</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="forward-rules">
+                                                <!-- Rules from API will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="iptables-row">
+                                        <div class="iptables-label">
+                                            <label>Set Default Action To:</label>
+                                        </div>
+                                        <select class="default-action-input" id="forward-default-action">
+                                            <option>ACCEPT</option>
+                                            <option>DROP</option>
+                                            <option>REJECT</option>
+                                        </select>
+                                        <div class="iptables-action-buttons" id="forward-action-buttons" style="display: none;">
+                                            <!-- These buttons will be hidden by default and shown when rules are available -->
+                                            <button class="iptables-btn-danger" id="delete-btn">
+                                              <span id="loading-spinner-forward" style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                              <!-- <span id="success-icon" style="display:none; color: green;">✔</span> -->
+                                              Delete Selected
+                                            </button>
+                                            <button class="iptables-btn">Move Selected</button>
+                                        </div>
+                                        <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                    </div>
+                                </div>
+                            
+                                <!-- Chain OUTPUT -->
+                                <div class="iptables-section output"  style="display: none;">
+                                    <h5 style="color: #a855f7; border-left: 4px solid #a855f7; padding-left: 8px;">
+                                        Outgoing packets (OUTPUT) - Áp dụng với các gói tin tạo bởi Firewall
+                                    </h5>
+                                    <p>Không có rules nào được chỉ định trong chain này</p>
+                                    <div class="iptables-table-container">
+                                        <table class="iptables-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><input type="checkbox"></th>
+                                                    <th>Action</th>
+                                                    <th>Condition</th>
+                                                    <th>Comment</th>
+                                                    <th>Move</th>
+                                                    <th>Add</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="output-rules">
+                                                <!-- Rules from API will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="iptables-row">
+                                        <div class="iptables-label">
+                                            <label>Set Default Action To:</label>
+                                        </div>
+                                        <select class="default-action-input" id="output-default-action">
+                                            <option>ACCEPT</option>
+                                            <option>DROP</option>
+                                            <option>REJECT</option>
+                                        </select>
+                                        <div class="iptables-action-buttons" id="output-action-buttons" style="display: none;">
+                                          <!-- These buttons will be hidden by default and shown when rules are available -->
+                                          <button class="iptables-btn-danger" id="delete-btn">
+                                            <span id="loading-spinner-output" style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            <!-- <span id="success-icon" style="display:none; color: green;">✔</span> -->
+                                            Delete Selected
+                                          </button>
+                                          <button class="iptables-btn">Move Selected</button>
+                                        </div>
+                                        <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                    </div>
+                                </div>
+                            
+                                <!-- Chain PREROUTING -->
+                                <div class="iptables-section prerouting"  style="display: none;">
+                                    <h5 style="color: #3bf68f; border-left: 4px solid #3bf68f; padding-left: 8px;">
+                                        Pre-routing packets (PREROUTING) - Áp dụng với các gói tin trước khi được định tuyến
+                                    </h5>
+                                    <p>Không có rules nào được chỉ định trong chain này</p>
+                                    <div class="iptables-table-container">
+                                        <table class="iptables-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><input type="checkbox"></th>
+                                                    <th>Action</th>
+                                                    <th>Condition</th>
+                                                    <th>Comment</th>
+                                                    <th>Move</th>
+                                                    <th>Add</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="prerouting-rules">
+                                                <!-- Rules from API will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="iptables-row">
+                                        <div class="iptables-label">
+                                            <label>Set Default Action To:</label>
+                                        </div>
+                                        <select class="default-action-input" id="prerouting-default-action">
+                                            <option>ACCEPT</option>
+                                            <option>DROP</option>
+                                            <option>REJECT</option>
+                                        </select>
+                                        <div class="iptables-action-buttons" id="prerouting-action-buttons" style="display: none;">
+                                          <!-- These buttons will be hidden by default and shown when rules are available -->
+                                          <!-- <button class="iptables-btn-danger">Delete Selected</button> -->
+
+                                            <!-- These buttons will be hidden by default and shown when rules are available -->
+                                          <button class="iptables-btn-danger" id="delete-btn">
+                                            <span id="loading-spinner-prerouting" style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            <!-- <span id="success-icon" style="display:none; color: green;">✔</span> -->
+                                            Delete Selected
+                                          </button>
+
+                                          <button class="iptables-btn">Move Selected</button>
+                                        </div>
+                                        <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                    </div>
+                                </div>
+                            
+                                <!-- Chain POSTROUTING -->
+                                <div class="iptables-section postrouting"  style="display: none;">
+                                    <h5 style="color: #f916f9; border-left: 4px solid #f916f9; padding-left: 8px;">
+                                        Post-routing packets (POSTROUTING) - Áp dụng với các gói tin sau khi được định tuyến
+                                    </h5>
+                                    <p>Không có rules nào được chỉ định trong chain này</p>
+                                    <div class="iptables-table-container">
+                                        <table class="iptables-table">
+                                            <thead>
+                                                <tr> 
+                                                    <th><input type="checkbox"></th>
+                                                    <th>Action</th>
+                                                    <th>Condition</th>
+                                                    <th>Comment</th>
+                                                    <th>Move</th>
+                                                    <th>Add</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="postrouting-rules">
+                                                <!-- Rules from API will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="iptables-row">
+                                        <div class="iptables-label">
+                                            <label>Set Default Action To:</label>
+                                        </div>
+                                        <select class="default-action-input" id="postrouting-default-action">
+                                            <option>ACCEPT</option>
+                                            <option>DROP</option>
+                                            <option>REJECT</option>
+                                        </select>
+                                        <div class="iptables-action-buttons" id="postrouting-action-buttons" style="display: none;">
+                                          <!-- These buttons will be hidden by default and shown when rules are available -->
+                                            <button class="iptables-btn-danger" id="delete-btn">
+                                              <span id="loading-spinner-postrouting" style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                              <!-- <span id="success-icon" style="display:none; color: green;">✔</span> -->
+                                              Delete Selected
+                                            </button>
+                                          <button class="iptables-btn">Move Selected</button>
+                                        </div>
+                                        <button class="iptables-btn add-rule-btn">Add Rule</button>
+                                    </div>
+                                </div>
+                            
+                                <!-- Save Configuration -->
+                                <div class="iptables-save-container">
+                                    <button class="iptables-save-btn">💾 Save Configuration</button>
+                                    <span>Nhấn vào nút này để lưu cấu hình trên vào tệp cấu hình BMC Firewall</span>
+                                </div>
+
+
+
+                                
+                            </div>
+                            <script src="../../assets/js/getiptables.js"></script>
+                            <script src="../../assets/js/fixiptables.js"></script>
+                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+                            <div class="iptables-container">
+
+
+
+                                                                                    <!-- Giao diện Thêm Rule (không thay đổi code HTML hiện có) -->
+                                                        <!-- Giao diện Add Rule mới -->
+                                                        <!-- Giao diện Add Rule mới -->
+                            <!-- Giao diện Add Rule mới -->
+                            <div id="add-rule-view" style="display: none; margin-top: 2px; margin-bottom: 2px;">
+                              <div class="addrule-header-unique">
+                                <button id="back-btn" type="button">&#x2190;</button>
+                                <h3>Thêm Rule Mới</h3>
+                                <span id="chain-info-text">Bạn đang thêm RULE vào chain <span id="current-chain-name">CHAIN</span></span>
+                              </div>
+                              
+
+                              <form id="rule-form-unique">
+                                <!-- Basic Options -->
+                                <fieldset class="addrule-fieldset">
+                                  <legend>Tùy chọn cơ bản</legend>
+                                  <div class="addrule-form-group">
+                                    <label for="rule-flag">Vị trí đặt rule (-A)</label>
+                                    <select id="rule-flag">
+                                      <option value="" selected>--- Chọn vị trí đặt rule ---</option>
+                                      <option value="-A">-A (Chèn xuống cuối chain)</option>
+                                      <option value="-I">-I (Chèn lên đầu chain)</option>
+                                      <!-- <option value="-D">-D (delete)</option>
+                                      <option value="-R">-R (replace)</option> -->
+                                    </select>
+                                  </div>
+                                  <div class="addrule-form-group">
+                                    <label for="protocol">Giao thức (-p)</label>
+                                    <select id="protocol">
+                                      <!-- Một số giao thức phổ biến -->
+                                      <option value="" selected>--- Chọn giao thức ---</option> <!-- giá trị mặc định null -->
+                                      <option value="all">ALL</option>
+                                      <option value="tcp">TCP</option>
+                                      <option value="udp">UDP</option>
+                                      <option value="icmp">ICMP</option>
+                                      
+                                      <!-- Danh sách giao thức bổ sung -->
+                                      <option value="ah">AH</option>
+                                      <option value="ax.25">AX.25</option>
+                                      <option value="dccp">DCCP</option>
+                                      <option value="ddp">DDP</option>
+                                      <option value="egp">EGP</option>
+                                      <option value="encap">ENCAP</option>
+                                      <option value="esp">ESP</option>
+                                      <option value="etherip">ETHERIP</option>
+                                      <option value="fc">FC</option>
+                                      <option value="ggp">GGP</option>
+                                      <option value="gmtp">GMTP</option>
+                                      <option value="gre">GRE</option>
+                                      <option value="hip">HIP</option>
+                                      <option value="hopopt">HOPOPT</option>
+                                      <option value="ip">IP</option>
+                                      <option value="ipcomp">IPCOMP</option>
+                                      <option value="ipip">IPIP</option>
+                                      <option value="ipip6">IPIP6</option>
+                                      <option value="ipsec">IPSEC</option>
+                                      <option value="ipv6-opts">IPV6-OPTS</option>
+                                      <option value="ipv6-frag">IPV6-FRAG</option>
+                                      <option value="ipv6-icmp">IPV6-ICMP</option>
+                                      <option value="ipv6-nonxt">IPV6-NONXT</option>
+                                      <option value="ipv6-route">IPV6-ROUTE</option>
+                                      <option value="l2tp">L2TP</option>
+                                      <option value="l2tpv2">L2TPv2</option>
+                                      <option value="layer2">LAYER2</option>
+                                      <option value="mh">MH</option>
+                                      <option value="mpls">MPLS</option>
+                                      <option value="mux">MUX</option>
+                                      <option value="nhrp">NHRP</option>
+                                      <option value="ospf">OSPF</option>
+                                      <option value="pgm">PGM</option>
+                                      <option value="pim">PIM</option>
+                                      <option value="pptp">PPTP</option>
+                                      <option value="pup">PUP</option>
+                                      <option value="raw">RAW</option>
+                                      <option value="rohc">ROHC</option>
+                                      <option value="routing">ROUTING</option>
+                                      <option value="rsvp">RSVP</option>
+                                      <option value="rtp">RTP</option>
+                                      <option value="rtcp">RTCP</option>
+                                      <option value="rx">RX</option>
+                                      <option value="sctp">SCTP</option>
+                                      <option value="shim6">SHIM6</option>
+                                      <option value="skip">SKIP</option>
+                                      <option value="sna">SNA</option>
+                                      <option value="st">ST</option>
+                                      <option value="sun-nd">SUN-ND</option>
+                                      <option value="svp">SVP</option>
+                                      <option value="swipe">SWIPE</option>
+                                      <option value="udplite">UDPLITE</option>
+                                      <option value="vines">VINES</option>
+                                      <option value="vlan">VLAN</option>
+                                      <option value="vmtp">VMTP</option>
+                                      <option value="vrrp">VRRP</option>
+                                      <option value="wesp">WESP</option>
+                                      <option value="xns-idp">XNS-IDP</option>
+                                      <option value="xtp">XTP</option>
+                                    </select>
+                                  </div>
+                                </fieldset>
+
+                                <!-- Addresses & Ports Fieldset (Chỉ phần chuyển đổi cập nhật) -->
+                                <fieldset class="addrule-fieldset network-and-port">
+                                  <legend>Địa chỉ mạng và Cổng</legend>
+                                  
+                                  <!-- Các hàng trước đó (IP nguồn & Port nguồn, IP đích & Port đích) giữ nguyên -->
+                                  <!-- Hàng 1: IP nguồn và Port nguồn -->
+                                  <div class="addrule-row">
+                                    <div class="addrule-form-group half">
+                                      <label for="src-address">IP nguồn (-s)</label>
+                                      <input type="text" id="src-address" placeholder="Ví dụ: 192.168.1.0/24">
+                                    </div>
+                                    <div class="addrule-form-group half">
+                                      <label for="src-port">Port nguồn (--sport)</label>
+                                      <input type="text" id="src-port" placeholder="Ví dụ: 80,443 hoặc 1024:2048">
+                                    </div>
+                                  </div>
+                                  
+                                  <!-- Hàng 2: IP đích và Port đích -->
+                                  <div class="addrule-row">
+                                    <div class="addrule-form-group half">
+                                      <label for="dst-address">IP đích (-d)</label>
+                                      <input type="text" id="dst-address" placeholder="Ví dụ: 10.0.0.0/8">
+                                    </div>
+                                    <div class="addrule-form-group half">
+                                      <label for="dst-port">Port đích (--dport)</label>
+                                      <input type="text" id="dst-port" placeholder="Ví dụ: 80,443 hoặc 1024:2048">
+                                    </div>
+                                  </div>
+                                  
+                                  <!-- Hàng 3: IP đích chuyển đổi và Port chuyển đổi (cho IP đích) -->
+                                  <div class="addrule-row">
+                                    <div class="addrule-form-group half">
+                                      <label for="to-dst-ip">IP đích chuyển đổi (--to-destination)</label>
+                                      <input type="text" id="to-dst-ip" placeholder="Ví dụ: 123.25.20.0/32">
+                                    </div>
+                                    <div class="addrule-form-group half">
+                                      <label for="to-dst-port">Port chuyển đổi (cho IP đích)</label>
+                                      <input type="text" id="to-dst-port" placeholder="Ví dụ: 8080 hoặc 1000:2000">
+                                    </div>
+                                  </div>
+                                  
+                                  <!-- Hàng 4: IP nguồn chuyển đổi và Port chuyển đổi (cho IP nguồn) -->
+                                  <div class="addrule-row">
+                                    <div class="addrule-form-group half">
+                                      <label for="to-src-ip">IP nguồn chuyển đổi (--to-source)</label>
+                                      <input type="text" id="to-src-ip" placeholder="Ví dụ: 192.168.3.0/24">
+                                    </div>
+                                    <div class="addrule-form-group half">
+                                      <label for="to-src-port">Port chuyển đổi (cho IP nguồn)</label>
+                                      <input type="text" id="to-src-port" placeholder="Ví dụ: 8080 hoặc 1000:2000">
+                                    </div>
+                                  </div>
+                                  
+                                  <!-- Hàng 5: Phạm vi cổng chuyển đổi, căn giữa -->
+                                  <div class="addrule-row centered-row">
+                                    <div class="addrule-form-group full">
+                                      <label for="to-ports">Phạm vi cổng chuyển đổi (--to-ports)</label>
+                                      <input type="text" id="to-ports" placeholder="Ví dụ: 8080,9090 hoặc 1000:2000">
+                                    </div>
+                                  </div>
+                                </fieldset>
+
+
+                                
+
+                                <!-- Interfaces -->
+                                <fieldset class="addrule-fieldset">
+                                  <legend>Giao diện mạng</legend>
+                                  <div class="addrule-form-group">
+                                    <label for="in-interface">Interface đầu vào (-i)</label>
+                                    <input type="text" id="in-interface" placeholder="Ví dụ: eth0">
+                                  </div>
+                                  <div class="addrule-form-group">
+                                    <label for="out-interface">Interface đầu ra (-o)</label>
+                                    <input type="text" id="out-interface" placeholder="Ví dụ: eth1">
+                                  </div>
+                                </fieldset>
+
+                                <!-- MAC Filtering -->
+                                <fieldset class="addrule-fieldset">
+                                  <legend>Lọc địa chỉ MAC (-m mac)</legend>
+                                  <div class="addrule-form-group">
+                                    <label for="mac-source">Địa chỉ MAC (--mac-source)</label>
+                                    <input type="text" id="mac-source" placeholder="Ví dụ: 58:11:22:ad:05:ff">
+                                  </div>
+                                </fieldset>
+
+                                <!-- Connection Tracking -->
+                                <fieldset class="addrule-fieldset">
+                                  <legend>Connection Tracking</legend>
+                                  <div class="addrule-form-group">
+                                    <label for="conn-state">Trạng thái kết nối:</label>
+                                    <select id="conn-state">
+                                      <option value="" selected>--- Chọn trạng thái kết nối ---</option>
+                                      <option value="NEW">NEW</option>
+                                      <option value="ESTABLISHED">ESTABLISHED</option>
+                                      <option value="RELATED">RELATED</option>
+                                      <option value="INVALID">INVALID</option>
+                                    </select>
+                                  </div>
+                                </fieldset>
+
+
+                                <!-- Advanced Options -->
+                                <fieldset class="addrule-fieldset">
+                                  <legend>Advanced Options</legend>
+                                  <div class="addrule-form-group">
+                                    <label for="multiport">Multiport (-m multiport)</label>
+                                    <input type="text" id="multiport" placeholder="Ví dụ: 80,443,8080">
+                                  </div>
+                                  <div class="addrule-form-group">
+                                    <label for="limit">Limit (-m limit)</label>
+                                    <input type="text" id="limit" placeholder="Ví dụ: 5/sec, 10 burst">
+                                  </div>
+                                  <div class="addrule-form-group">
+                                    <label for="rule-comment">Comment (--log-prefix comment)</label>
+                                    <input type="text" id="rule-comment" placeholder="Nhập ghi chú cho rule">
+                                  </div>
+                                </fieldset>
+
+                                <!-- Action -->
+                                <fieldset class="addrule-fieldset">
+                                  <legend>Action</legend>
+                                  <div class="addrule-form-group">
+                                    <label for="target">Hành động (-j)</label>
+                                    <select id="target">
+                                      <option value="" selected>--- Chọn hành động ---</option>
+                                      <option value="ACCEPT">ACCEPT</option>
+                                      <option value="DROP">DROP</option>
+                                      <option value="REJECT">REJECT</option>
+                                      <option value="LOG">LOG</option>
+                                      <option value="DNAT">DNAT</option>
+                                      <option value="MASQUERADE">MASQUERADE</option>
+                                      
+                                      <option value="custom">Chuyển đến chain khác</option>
+                                    </select>
+                                  </div>
+                                </fieldset>
+
+                                <!-- Nút Lưu Rule (span 2 cột) -->
+                                <!-- Nút Lưu Rule (span 2 cột) với ô hiển thị options bên trái -->
+                                <div class="addrule-button-container">
+                                  <span id="selected-options">-t </span>
+                                  <button type="button" id="preview-btn" class="iptables-btn">Xem trước</button>
+                                  <button type="submit" class="iptables-btn">Lưu Rule</button>
+                                </div>
+                                
+
+                              </form>
+                            </div>
+                            <script src="../../assets/js/themrulemanual.js"></script>
+
+
+
+                                                        
+
+
+
+                            
+
+                            
+
+                            
+
+        
+                
+        
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <footer class="footer">
+                <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                  <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bmctech.vn 2024</span>
+                  <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Security <a href="https://bmctech.vn/" target="_blank">BMC</a> from bmctech.vn</span>
+                </div>
+            </footer>
+        </div>
+        
+        <div id="toast-container" class="toast-container"></div>
+    
+          
+
+    <!-- page-body-wrapper ends -->
+  </div>
+
+
+  <script src="../../assets/js/off-canvas.js"></script>
+  <script src="../../assets/js/hoverable-collapse.js"></script>
+  <script src="../../assets/js/misc.js"></script>
+  <script src="../../assets/js/settings.js"></script>
+  <script src="../../assets/js/todolist.js"></script>
+
+  
+  
+  
+
+
+
+
+    <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- endinject -->
+
+  
+  <!-- endinject -->
+  <!-- Custom js for this page -->
+  <script src="assets/js/dashboard.js"></script>
+  <!-- End custom js for this page -->
+</body>
+
+</html>

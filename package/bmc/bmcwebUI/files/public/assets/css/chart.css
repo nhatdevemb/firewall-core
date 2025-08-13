@@ -1,0 +1,376 @@
+/* Thêm vạch kẻ dọc mờ giữa các cột trong bảng */
+.table th, .table td {
+    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Vạch kẻ dọc mờ */
+    padding: 8px;
+}
+
+.table th:last-child, .table td:last-child {
+    border-right: none; /* Loại bỏ vạch kẻ ở cột cuối cùng */
+}
+
+
+/* Thay đổi màu chữ cho các phần trong bảng */
+
+
+/* Thay đổi màu chữ cho dữ liệu trong bảng */
+.table td {
+    color: #00bac7;  /* Màu chữ trắng */
+}
+
+/* Thay đổi màu cho các cột Frequency */
+.table td:nth-child(3) {
+    color: #00ff00;  /* Màu chữ xanh cho cột Frequency */
+}
+
+/* Thay đổi màu cho các cột Hits */
+.table td:nth-child(2) {
+    color: #c5c5c5;  /* Màu chữ vàng cho cột Hits */
+}
+
+
+/* Tạo khung chứa thanh tiến trình */
+.progress-container {
+    width: 100%;    /* Chiều rộng 100% tùy theo không gian của cột */
+    height: 8px;    /* Chiều cao nhỏ gọn */
+    background-color: #474747; /* Màu nền tối */
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Thanh tiến trình chung cho cả Blocked và Permitted */
+.progress-bar {
+    height: 100%;
+    transition: width 0.5s ease-in-out; /* Hiệu ứng mượt mà khi thay đổi chiều rộng */
+}
+
+/* Thanh tiến trình cho phần Blocked (đỏ) */
+.progress-bar.blocked {
+    background-color: #b71c1c; /* Màu đỏ đậm */
+}
+
+/* Thanh tiến trình cho phần Permitted (xanh) */
+.progress-bar.permitted {
+    background-color: #4CAF50; /* Màu xanh lá */
+}
+
+/* Hiển thị thông báo thanh tiến trình (nếu cần) */
+.progress-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+}
+
+
+
+
+
+/* Tạo một lớp đặc thù cho phần phân tích lưu lượng sử dụng 4 ứng dụng */
+.custom-card {
+    background-color: #2C3E50; /* Màu nền tối tạo sự trang trọng */
+    border-radius: 10px; /* Góc bo tròn cho card */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Tạo hiệu ứng bóng mờ */
+    margin-top: 30px; /* Khoảng cách phía trên card */
+    padding: 20px; /* Khoảng cách nội bộ trong card */
+}
+
+/* Tiêu đề của card */
+.custom-card-title {
+    font-size: 24px; /* Kích thước chữ lớn cho tiêu đề */
+    color: #F39C12; /* Màu vàng nổi bật */
+    text-align: center; /* Căn giữa tiêu đề */
+    font-weight: bold; /* Chữ đậm để nổi bật */
+    margin-bottom: 25px; /* Khoảng cách dưới tiêu đề */
+    text-transform: uppercase; /* Viết hoa toàn bộ chữ */
+}
+
+/* Cập nhật style cho phần chứa biểu đồ */
+.custom-card-body {
+    padding: 20px; /* Tạo khoảng cách đẹp cho phần thân */
+    font-family: 'Arial', sans-serif;
+    color: #ECF0F1; /* Màu chữ sáng, dễ đọc */
+}
+
+/* Điều chỉnh chiều rộng và chiều cao của biểu đồ */
+.custom-canvas {
+    max-width: 100%;
+    height: 450px; /* Đảm bảo chiều cao phù hợp */
+    margin: 0 auto; /* Căn giữa */
+}
+
+/* Tạo hiệu ứng mượt mà khi hover vào phần biểu đồ */
+.custom-canvas {
+    transition: transform 0.3s ease-in-out; /* Hiệu ứng phóng to khi hover */
+}
+
+
+
+/* Hiệu ứng khi đang tải dữ liệu */
+.table-responsive {
+    position: relative;
+    padding: 20px;
+    background-color: #34495E; /* Màu nền nhẹ nhàng cho khu vực chứa biểu đồ */
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Đảm bảo cột trong bảng biểu đồ có sự phân chia rõ ràng */
+th, td {
+ 
+    padding: 10px;
+    color: #ECF0F1; /* Chữ sáng dễ nhìn */
+}
+
+th {
+    font-weight: bold;
+    background-color: #34495E; /* Màu nền cho tiêu đề */
+}
+
+/* Tạo hiệu ứng cho phần loading khi dữ liệu chưa được tải */
+#loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+}
+
+#loadingOverlay.visible {
+    visibility: visible;
+}
+
+/* Tạo màu sắc riêng biệt cho thanh tiến trình của các cột */
+.progress-container {
+    background-color: #575757;
+    border-radius: 5px;
+    height: 10px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 5px;
+}
+
+.permitted {
+    background-color: #2ecc71; /* Màu xanh lá cho phép */
+}
+
+.blocked {
+    background-color: #e74c3c; /* Màu đỏ cho bị chặn */
+}
+
+
+
+/* Tạo một lớp đặc thù cho phần phân tích lưu lượng sử dụng 4 ứng dụng */
+.custom-card {
+    background-color: #2C3E50; /* Màu nền tối tạo sự trang trọng */
+    border-radius: 10px; /* Góc bo tròn cho card */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Tạo hiệu ứng bóng mờ */
+    margin-top: 30px; /* Khoảng cách phía trên card */
+    padding: 20px; /* Khoảng cách nội bộ trong card */
+}
+
+/* Cập nhật lớp cho tiêu đề */
+.custom-card-title {
+    font-size: 24px; /* Kích thước chữ lớn cho tiêu đề */
+    color: #F39C12; /* Màu vàng nổi bật */
+    text-align: center; /* Căn giữa tiêu đề */
+    font-weight: bold; /* Chữ đậm để nổi bật */
+    margin-bottom: 15px; /* Khoảng cách dưới tiêu đề */
+    text-transform: uppercase; /* Viết hoa toàn bộ chữ */
+}
+
+/* Cập nhật style cho phần chứa biểu đồ */
+.custom-card-body {
+    padding: 20px; /* Tạo khoảng cách đẹp cho phần thân */
+    font-family: 'Arial', sans-serif;
+    color: #ECF0F1; /* Màu chữ sáng, dễ đọc */
+}
+
+/* Điều chỉnh chiều rộng và chiều cao của biểu đồ */
+.custom-canvas {
+    max-width: 100%;
+    height: 450px; /* Đảm bảo chiều cao phù hợp */
+    margin: 0 auto; /* Căn giữa */
+}
+
+/* Tạo hiệu ứng mượt mà khi hover vào phần biểu đồ */
+.custom-canvas {
+    transition: transform 0.3s ease-in-out; /* Hiệu ứng phóng to khi hover */
+}
+
+
+
+/* Hiệu ứng khi đang tải dữ liệu */
+.table-responsive {
+    position: relative;
+    padding: 20px;
+    background-color: #34495E; /* Màu nền nhẹ nhàng cho khu vực chứa biểu đồ */
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Đảm bảo cột trong bảng biểu đồ có sự phân chia rõ ràng */
+th, td {
+    padding: 10px;
+    color: #ECF0F1; /* Chữ sáng dễ nhìn */
+}
+
+th {
+    font-weight: bold;
+    background-color: #34495E; /* Màu nền cho tiêu đề */
+}
+
+/* Tạo hiệu ứng cho phần loading khi dữ liệu chưa được tải */
+#loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+}
+
+#loadingOverlay.visible {
+    visibility: visible;
+}
+
+/* Tạo màu sắc riêng biệt cho thanh tiến trình của các cột */
+.progress-container {
+    background-color: #5e5e5e;
+    border-radius: 5px;
+    height: 10px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 5px;
+}
+
+.permitted {
+    background-color: #2ecc71; /* Màu xanh lá cho phép */
+}
+
+.blocked {
+    background-color: #e74c3c; /* Màu đỏ cho bị chặn */
+}
+
+/* Lớp chứa các biểu tượng của ứng dụng */
+.legend-container {
+    display: flex;
+    justify-content: center;  /* Căn giữa các biểu tượng */
+    align-items: center;  /* Căn giữa theo chiều dọc */
+    gap: 20px;  /* Khoảng cách giữa các icon */
+    margin-top: 15px;  /* Khoảng cách giữa tiêu đề và icon */
+}
+
+/* Cập nhật cách hiển thị từng icon */
+.legend-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa các phần tử */
+    cursor: pointer;  /* Thêm hiệu ứng con trỏ khi hover */
+    transition: transform 0.3s ease; /* Hiệu ứng mượt mà khi hover */
+}
+
+.legend-item:hover {
+    transform: scale(1.1); /* Phóng to icon một chút khi hover */
+}
+
+/* Cập nhật kích thước icon */
+.legend-item img {
+    width: 30px;  /* Kích thước icon */
+    height: 30px; /* Kích thước icon */
+    margin-bottom: 5px;  /* Khoảng cách giữa icon và tên */
+    border-radius: 50%;  /* Viền tròn cho icon */
+
+}
+
+/* Kích thước và màu sắc cho tên các nền tảng */
+.legend-item span {
+    font-size: 14px;  /* Kích thước chữ nhỏ hơn */
+    color: #ECF0F1;  /* Màu chữ sáng */
+    text-align: center; /* Căn giữa tên nền tảng */
+    font-weight: 500; /* Cân đối độ đậm */
+}
+
+/* Hiệu ứng hover cho tên nền tảng */
+.legend-item span:hover {
+    color: #F39C12; /* Màu chữ khi hover */
+}
+
+
+
+
+/* CSS for Popup */
+.popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.popup-content h4 {
+    margin-bottom: 10px;
+}
+
+.popup-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.popup-content li {
+    padding: 5px 0;
+}
+
+.popup-content button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.popup-content button:hover {
+    background-color: #0056b3;
+}
+
+

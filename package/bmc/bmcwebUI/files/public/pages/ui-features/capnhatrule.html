@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Trình quản lý BMC IDS/IPS</title>
+
+
+  <!-- plugins:css -->
+    <!-- Thêm CSS của DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- Thêm jQuery từ CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <!-- Thêm DataTables JS từ CDN -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
+     
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End Plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+
+    <link rel="stylesheet" href="../../assets/css/style_capnhat.css">
+    <link rel="stylesheet" href="../../assets/css/capnhat.css">
+    <link rel="stylesheet" href="../../assets/css/importrules.css">
+    <link rel="stylesheet" href="../../assets/css/updatePopup.css">
+
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="../../assets/images/iconnho.png" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:../../partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+          <a class="sidebar-brand brand-logo" href="../../index.html"><img src="../../assets/images/IDDS.png" alt="logo" /></a>
+          <a class="sidebar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+        </div>
+        <ul class="nav">
+          <li class="nav-item profile">
+          </li>
+          <li class="nav-item nav-category">
+            <span class="nav-link">Navigation</span>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../index.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-speedometer"></i>
+              </span>
+              <span class="menu-title">Trang chủ</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+              <span class="menu-icon">
+                <i class="mdi mdi-laptop"></i>
+              </span>
+              <span class="menu-title">Rule Database</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="ui-basic">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="checkDatabase.html">Kiểm tra Database</a></li>
+                <li class="nav-item"> <a class="nav-link" href="suarule.html">Tìm và sửa Rules</a></li>
+                <li class="nav-item"> <a class="nav-link" href="capnhatrule.html">Cập nhật Rules</a></li>
+            </div>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="switchmode.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-playlist-play"></i>
+              </span>
+              <span class="menu-title">Chuyển chế độ IDS/IPS</span>
+            </a>
+          </li>
+          <!-- <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/forms/basic_elements.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-playlist-play"></i>
+              </span>
+              <span class="menu-title">Form Elements</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/tables/basic-table.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-table-large"></i>
+              </span>
+              <span class="menu-title">Tables</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/charts/chartjs.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-chart-bar"></i>
+              </span>
+              <span class="menu-title">Charts</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/icons/mdi.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-contacts"></i>
+              </span>
+              <span class="menu-title">Icons</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
+              <span class="menu-icon">
+                <i class="mdi mdi-security"></i>
+              </span>
+              <span class="menu-title">User Pages</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="auth">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/blank-page.html"> Blank Page </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html"> 404 </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-500.html"> 500 </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/login.html"> Login </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/register.html"> Register </a></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-file-document-box"></i>
+              </span>
+              <span class="menu-title">Documentation</span>
+            </a>
+          </li> -->
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
+              <span class="menu-icon">
+                <i class="mdi mdi-security"></i>
+              </span>
+              <span class="menu-title">Sửa cấu hình</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="auth">
+              <ul class="nav flex-column sub-menu">
+                <!-- <li class="nav-item"> <a class="nav-link" href="../../pages/samples/blank-page.html"> Blank Page </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html"> 404 </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-500.html"> 500 </a></li> -->
+                <li class="nav-item"> <a class="nav-link" href="/pages/ui-features/setting.html"> Config </a></li>
+                <!-- <li class="nav-item"> <a class="nav-link" href="../../pages/samples/register.html"> Register </a></li> -->
+              </ul>
+            </div>
+          </li>
+          <!-- <li class="nav-item menu-items">
+            <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-file-document-box"></i>
+              </span>
+              <span class="menu-title">Documentation</span>
+            </a>
+          </li> -->
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="javascript:void(0);" onclick="toggleFirewallPopup()">
+                <span class="menu-icon">
+                    <i class="mdi mdi-lock"></i> <!-- Thay icon phù hợp -->
+                </span>
+                <span class="firewall-menu-item"> 
+                    Yêu cầu truy cập mới 
+                    <span id="firewall-badge" class="firewall-badge">0</span>
+                </span>
+            </a>
+        </li>
+
+        <!-- Popup hiển thị request -->
+        <div id="firewall-popup-container" class="firewall-popup-overlay">
+            <div class="firewall-popup-content">
+                <!-- Header với nút đóng góc phải -->
+                <div class="firewall-popup-header">
+                    <span>New Firewall Requests</span>
+                </div>
+
+                <!-- Bảng hiển thị request -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th>Name</th> <!-- Thêm cột "Name" -->
+                        </tr>
+                    </thead>
+                    <tbody id="firewall-popup-table">
+                        <!-- Dữ liệu động sẽ được thêm vào đây -->
+                    </tbody>
+                </table>
+
+                <!-- Footer với 2 nút -->
+                <div class="firewall-popup-footer">
+                    <button class="firewall-log-btn">View Full Log</button>
+                    <button class="firewall-footer-close-btn" onclick="closeFirewallPopup()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 Popup View Full Log -->
+        <div id="firewall-full-log-container" class="firewall-popup-overlay">
+            <div class="firewall-popup-content">
+                <!-- Header -->
+                <div class="firewall-popup-header">
+                    <span>Firewall Full Log</span>
+                </div>
+
+                <!-- Bảng hiển thị log đầy đủ -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th>Name</th> <!-- Thêm cột "Name" -->
+                        </tr>
+                    </thead>
+                    <tbody id="firewall-full-log-table">
+                        <!-- 🔥 Dữ liệu từ file log sẽ được load vào đây -->
+                    </tbody>
+                </table>
+
+                <!-- Nút đóng -->
+                <div class="firewall-popup-footer">
+                    <button class="firewall-footer-close-btn" onclick="closeFullLogPopup()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="../../assets/js/firewall.js"></script>
+
+
+
+        <li class="nav-item menu-items">
+          <a class="nav-link" href="../../pages/tables/basic-table.html">
+            <span class="menu-icon">
+              <i class="mdi mdi-table-large"></i>
+            </span>
+            <span class="menu-title">Cách ly & Khôi phục</span>
+          </a>
+        </li>
+
+        <li class="nav-item menu-items">
+          <a class="nav-link" href="../tables/basic-table.html">
+            <span class="menu-icon">
+              <i class="mdi mdi-table-large"></i>
+            </span>
+            <span class="menu-title">Cách ly & Khôi phục</span>
+          </a>
+        </li>
+
+        <li class="nav-item menu-items">
+          <a class="nav-link" href="../firewall/firewall.html">
+            <span class="menu-icon">
+              <i class="mdi mdi-contacts"></i>
+            </span>
+            <span class="menu-title">Tường lửa</span>
+          </a>
+        </li>
+
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../login">
+              <span class="menu-icon">
+                <i class="mdi mdi-logout"></i>
+              </span>
+              <span class="menu-title">Đăng xuất</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:../../partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+          <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+            <a class="navbar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+          </div>
+          <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+              <span class="mdi mdi-format-line-spacing"></span>
+            </button>
+          </div>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            
+            <div class="row">
+
+              <!-- <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card custom-height-card" id="activeRuleCategories">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-9">
+                                <div class="d-flex align-items-center align-self-start">
+                                    <h3 class="mb-0" id="rulesCount"></h3>
+                                </div>
+                            </div>
+                            <div class="col-3" style="opacity: 0;">
+                                <div class="icon icon-box-success">
+                                    <span class="mdi mdi-arrow-top-right icon-item"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <h6 class="text-muted font-weight-normal">Active rule categories</h6>
+                    </div>
+                </div>
+            </div> -->
+            
+            <!-- Popup hiển thị danh sách rules -->
+            <!-- Popup container -->
+            <div class="feeds-management-container">
+              <div class="header">
+                <h2>Feeds Management</h2>
+                <button class="add-new-feed-btn">Add New Feed</button>
+              </div>
+            
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>Emerging Threats Open Ruleset - Suricata</h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+            
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+            
+                <div class="tab-content">
+                  <div class="connection">
+                    <label for="feed1-url">Feed URL:</label>
+                    <input type="text" id="feed1-url" value="https://rules.emergingthreats.net/open/old/suricata-4.0/rules/" readonly>
+                    
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar1" class="notification-bar" style="display: none;"></div>
+            
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader1" class="loader" style="display: none; margin: 10px 0;"></div>
+            
+                    <div class="buttons">
+                      <button class="save-changes" id="checkUpdate1">Kiểm tra cập nhật</button>
+                      <button class="update-btn" id="downloadUpdate1" onclick="downloadFileFromUrl('https://rules.emergingthreats.net/open/old/suricata-4.0/emerging.rules.tar.gz', 'downloadUpdate1', 'notification-bar1', 'loader1')" disabled>Tải bản cập nhật mới</button>
+                      
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput1" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice1" disabled>Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat1">Cập nhật vào thiết bị</button>
+
+                    </div>
+            
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName1" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName1"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <!-- Chèn script checkupdateET.js -->
+              <script src="../../assets/js/checkupdateET.js"></script>
+              <script src="../../assets/js/importUpdate.js"></script>
+              
+              
+              <!-- Feed 2 -->
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>Positive Technologies Attack Detection Team Ruleset</h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+
+                <div class="tab-content">
+                  <div class="connection">
+                    <label for="feed2-url">Feed URL:</label>
+                    <input type="text" id="feed2-url" value="https://rules.ptsecurity.com/files/ptopen-all" readonly>
+                    
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar2" class="notification-bar" style="display: none;"></div>
+
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader2" class="loader" style="display: none; margin: 10px 0;"></div>
+
+                    <div class="buttons">
+                      <button class="save-changes" id="checkUpdate2">Kiểm tra cập nhật</button>
+                      <button class="update-btn" id="downloadUpdate2" onclick="downloadFileFromUrl('https://rules.ptsecurity.com/files/ptopen.rules.tar.gz', 'downloadUpdate2', 'notification-bar2', 'loader2')" disabled>Tải bản cập nhật mới</button>
+                      
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput2" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice2" disabled>Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat2">Cập nhật vào thiết bị</button>
+                    </div>
+
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName2" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName2"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <script src="../../assets/js/checkupdatePT.js"></script>
+              <script src="../../assets/js/importUpdatePT.js"></script>
+
+              <!-- Feed 3 -->
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>OISF Suricata Traffic ID Ruleset</h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+
+                <div class="tab-content">
+                  <div class="connection">
+                    <label for="feed3-url">Feed URL:</label>
+                    <input type="text" id="feed3-url" value="https://openinfosecfoundation.org/rules/trafficid/trafficid.rules" readonly>
+                    
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar3" class="notification-bar" style="display: none;"></div>
+
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader3" class="loader" style="display: none; margin: 10px 0;"></div>
+
+                    <div class="buttons">
+                      <button class="save-changes" id="checkUpdate3">Kiểm tra cập nhật</button>
+                      <button class="update-btn" id="downloadUpdate3" disabled>Tải bản cập nhật mới</button>
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput3" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice3" disabled>Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat3">Cập nhật vào thiết bị</button>
+                    </div>
+
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName3" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName3"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <script src="../../assets/js/checkupdateOISF.js"></script>
+              <script src="../../assets/js/importUpdateOISF.js"></script>
+
+              <!-- Feed 4 -->
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>@travisbgreen Threat hunting Ruleset</h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+
+                <div class="tab-content">
+                  <div class="connection">
+                    <label for="feed4-url">Feed URL:</label>
+                    <input type="text" id="feed4-url" value="https://raw.githubusercontent.com/travisbgreen/hunting-rules/master/hunting.rules" readonly>
+                    
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar4" class="notification-bar" style="display: none;"></div>
+
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader4" class="loader" style="display: none; margin: 10px 0;"></div>
+
+                    <div class="buttons">
+                      <button class="save-changes" id="checkUpdate4">Kiểm tra cập nhật</button>
+                      <button class="update-btn" id="downloadUpdate4" disabled>Tải bản cập nhật mới</button>
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput4" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice4" disabled>Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat4">Cập nhật vào thiết bị</button>
+                    </div>
+
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName4" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName4"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <script src="../../assets/js/checkupdatetravisbgreen.js"></script>
+              <script src="../../assets/js/importUpdatravisbgreen.js"></script>
+
+              <!-- Feed 5 -->
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>Abuse.ch SSL Blacklist Ruleset</h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+
+                <div class="tab-content">
+                  <div class="connection">
+                    <label for="feed5-url">Feed URL:</label>
+                    <input type="text" id="feed5-url" value="https://sslbl.abuse.ch/blacklist/sslblacklist_tls_cert.rules" readonly>
+                    
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar5" class="notification-bar" style="display: none;"></div>
+
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader5" class="loader" style="display: none; margin: 10px 0;"></div>
+
+                    <div class="buttons">
+                      <button class="save-changes" id="checkUpdate5">Kiểm tra cập nhật</button>
+                      <button class="update-btn" id="downloadUpdate5" disabled>Tải bản cập nhật mới</button>
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput5" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice5" disabled>Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat5">Cập nhật vào thiết bị</button>
+                    </div>
+
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName5" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName5"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <script src="../../assets/js/checkupdateAbuse.js"></script>
+              <script src="../../assets/js/importUpdateAbuse.js"></script>
+
+              <!-- Feed 6 -->
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>abuse.ch SSLBL Botnet C2 IP Ruleset</h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+
+                <div class="tab-content">
+                  <div class="connection">
+                    <label for="feed6-url">Feed URL:</label>
+                    <input type="text" id="feed6-url" value="https://sslbl.abuse.ch/blacklist/sslipblacklist_aggressive.rules" readonly>
+                    
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar6" class="notification-bar" style="display: none;"></div>
+
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader6" class="loader" style="display: none; margin: 10px 0;"></div>
+
+                    <div class="buttons">
+                      <button class="save-changes" id="checkUpdate6">Kiểm tra cập nhật</button>
+                      <button class="update-btn" id="downloadUpdate6" disabled>Tải bản cập nhật mới</button>
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput6" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice6" disabled>Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat6">Cập nhật vào thiết bị</button>
+                    </div>
+
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName6" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName6"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <script src="../../assets/js/checkupdateAbuseBlack.js"></script>
+              <script src="../../assets/js/importUpdateAbuseBlack.js"></script>
+
+              <!-- Feed 7 -->
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>abuse.ch JA3 Fingerprint Ruleset </h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch7">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+
+                <div class="tab-content">
+                  <div class="connection">
+                    <label for="feed7-url">Feed URL:</label>
+                    <input type="text" id="feed7-url" value="https://sslbl.abuse.ch/blacklist/ja3_fingerprints.rules" readonly>
+                    
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar7" class="notification-bar" style="display: none;"></div>
+
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader7" class="loader" style="display: none; margin: 10px 0;"></div>
+
+                    <div class="buttons">
+                      <button class="save-changes" id="checkUpdate7">Kiểm tra cập nhật</button>
+                      <button class="update-btn" id="downloadUpdate7" disabled>Tải bản cập nhật mới</button>
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput7" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice7" disabled>Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat7">Cập nhật vào thiết bị</button>
+                    </div>
+
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName7" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName7"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <script src="../../assets/js/checkupdateAbuseJa3.js"></script>
+              <script src="../../assets/js/importUpdateAbuseJa3.js"></script>
+
+              <!-- Feed 8 -->
+              <div class="feed-card">
+                <div class="feed-header">
+                  <h5>My custom rules</h5>
+                  <label class="switch">
+                    <input type="checkbox" id="toggleSwitch8">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="tabs">
+                  <ul class="nav-tabs">
+                    <li class="tab active">Connection</li>
+                    <li class="tab">Settings</li>
+                  </ul>
+                </div>
+
+                <div class="tab-content">
+
+                    <!-- Notification bar để hiển thị kết quả -->
+                    <div id="notification-bar8" class="notification-bar" style="display: none;"></div>
+
+                    <!-- Loader hiển thị khi đang kiểm tra cập nhật -->
+                    <div id="loader8" class="loader" style="display: none; margin: 10px 0;"></div>
+
+                    <div class="buttons">
+                      <!-- Input file ẩn để chọn file -->
+                      <input type="file" id="fileInput8" style="display: none;" multiple />
+                      
+                      <!-- Nút để người dùng nhấn để chọn file -->
+                      <button class="update-btn" id="importUpdateDevice8">Nhấn để chọn file cập nhật</button>
+                      <button class="update-btn" id="capnhat8">Cập nhật vào thiết bị</button>
+                    </div>
+
+                    <!-- Hiển thị tên file đã chọn -->
+                    <div id="selectedFileName8" style="margin-top: 10px; display: none;">
+                      <strong>File đã chọn:</strong> <span id="fileName8"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <script src="../../assets/js/importCustomRules.js"></script>
+              
+
+
+
+              
+
+            </div>
+            
+
+            </div>
+
+
+            <!-- <div id="updatePopup" class="popup-overlay" style="display: none;">
+              <div class="popup-content">
+                <h3>Cập Nhật Thiết Bị</h3>
+                <p id="fileUpdatingMessage">
+                  Bạn đang cập nhật nội dung cho <span class="highlight">trafficid.rules</span>
+                </p>
+                <p>Chọn file để cập nhật (chỉ file .rules)</p>
+                <div class="file-upload-container">
+                  <input type="file" id="fileInputPopup" accept=".rules">
+                  <span id="selectedFileNamePopup" style="display: none;"></span>
+                </div> -->
+                <!-- Khu vực hiển thị thông báo -->
+                <!-- <div id="updateStatusMessage" style="display: none; margin-top: 10px; font-size: 14px;"></div>
+                <div class="popup-buttons">
+                  <button id="updateConfirmButton" disabled>Cập nhật</button>
+                  <button id="closePopupButton">Đóng</button>
+                </div>
+              </div>
+            </div> -->
+      </nav>
+
+      <!-- Popup thông báo -->
+      <!-- Popup thông báo -->
+      <div id="notificationPopup" class="popup-overlay">
+        <div class="popup-message">
+            <p id="popupMessage"></p>
+            <button id="closePopupBtn" class="popup-close-btn">Đóng</button>
+        </div>
+      </div>
+
+                                                                <!-- Modal để hiển thị sự khác biệt -->
+
+      <!-- partial -->
+      <footer class="footer">
+        <div class="d-sm-flex justify-content-center justify-content-sm-between">
+          <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bmctech.vn 2024</span>
+          <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Security <a href="https://bmctech.vn/" target="_blank">BMC</a> from bmctech.vn</span>
+        </div>
+      </footer>
+
+       <!-- <div class="main-panel"> -->
+        <!-- <div class="content-wrapper"> -->
+        <!-- </div> -->
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+
+        <!-- partial -->
+      <!-- </div> -->
+  
+
+      <!-- main-panel ends -->
+    </div>
+
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+
+  <script src="../../assets/js/off-canvas.js"></script>
+  <script src="../../assets/js/hoverable-collapse.js"></script>
+  <script src="../../assets/js/misc.js"></script>
+  <script src="../../assets/js/settings.js"></script>
+  <script src="../../assets/js/todolist.js"></script>
+  <!-- <script src="../../assets/js/capnhatrule.js"></script> -->
+  <script src="../../assets/js/kichhoatnut.js"></script>
+  <script src="../../assets/js/downloadrule.js"></script>
+  <script src="../../assets/js/tairule.js"></script>
+  <script src="../../assets/js/disableNut.js"></script>
+  
+  
+  
+
+
+
+
+    <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- endinject -->
+
+  
+  <!-- endinject -->
+  <!-- Custom js for this page -->
+  <script src="assets/js/dashboard.js"></script>
+  <!-- End custom js for this page -->
+</body>
+
+</html>

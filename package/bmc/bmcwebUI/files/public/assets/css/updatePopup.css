@@ -1,0 +1,158 @@
+/* Nền tối cho overlay của popup mới */
+.popup-overlay-new {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Sử dụng nền tối hơn */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+/* Căn chỉnh popup nội dung mới */
+.popup-content-new {
+    background: #f9f9f9; /* Màu nền sáng hơn */
+    width: 600px; /* Tăng chiều rộng popup */
+    padding: 35px; /* Tăng khoảng cách nội dung */
+    border-radius: 15px; /* Bo tròn góc nhiều hơn */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Tiêu đề của popup mới */
+.popup-content-new h3 {
+    margin: 0 0 20px;
+    font-size: 32px;
+    color: #333333;
+    font-weight: bold;
+}
+
+/* Đoạn văn bản trong popup mới */
+.popup-content-new p {
+    margin: 12px 0;
+    color: #555555;
+    font-size: 20px;
+    line-height: 1.7;
+}
+
+/* Highlight text cho phiên bản mới */
+.popup-content-new .highlight-new {
+    color: #28a745; /* Màu xanh lá cho phiên bản mới */
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* Các nút trong popup mới */
+.popup-buttons-new {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+    gap: 25px;
+}
+
+.popup-buttons-new button {
+    flex: 1;
+    padding: 15px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Nút xác nhận */
+#downloadUpdateNowButtonNew {
+    background-color: #007BFF;
+    color: #ffffff;
+}
+
+#downloadUpdateNowButtonNew:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Nút đóng */
+#closePopupButtonNew {
+    background-color: #e67e22;
+    color: #ffffff;
+}
+
+#closePopupButtonNew:hover {
+    background-color: #e4e4e4;
+    color: #333;
+}
+
+
+/* Overlay để phủ toàn màn hình khi popup hiển thị */
+.popup-overlay {
+    display: none; /* Mặc định ẩn */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Màu nền bán trong suốt */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Phần message trong popup */
+.popup-message {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Nút đóng */
+.popup-close-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+.popup-close-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Định dạng văn bản trong popup */
+.popup-message p {
+    font-size: 18px;
+    color: #333;
+}
+
+
+/* Đề mục cha (Quản lý địa chỉ MAC) */
+.page-title {
+    font-size: 28px;  /* Tăng kích thước chữ */
+    font-weight: bold; /* Chữ in đậm */
+    color: #00bfff;  /* Màu xanh nổi bật */
+    text-transform: uppercase; /* Viết hoa toàn bộ */
+    margin-bottom: 20px; /* Tạo khoảng cách dưới */
+}
+
+/* Đề mục con (Nhập địa chỉ IP, Kết quả kiểm tra) */
+.card-title {
+    font-size: 22px; /* Tăng kích thước chữ */
+    font-weight: bold; /* Chữ in đậm */
+    color: #ffcc00;  /* Màu vàng nổi bật */
+    text-transform: uppercase; /* Viết hoa toàn bộ */
+    border-bottom: 1px solid #ffcc00; /* Gạch chân */
+    padding-bottom: 5px; /* Tạo khoảng cách với nội dung bên dưới */
+    margin-bottom: 15px; /* Tạo khoảng cách dưới */
+}
+

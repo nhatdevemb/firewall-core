@@ -1,0 +1,223 @@
+/* style.css */
+
+/* Reset một số phần tử mặc định */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Cấu trúc chung của trang */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #e0e0e0;  /* Nền xám sáng */
+    color: #333;
+    line-height: 1.6;
+    padding: 30px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Tiêu đề chính */
+h1 {
+    text-align: center;
+    color: #4caf50;  /* Màu xanh lá cây */
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Phần danh sách file */
+#file-list {
+    width: 100%;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Thanh tiến trình */
+.progress {
+    background-color: #b0bec5;  /* Nền xám nhạt */
+    width: 100%;
+    height: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.progress-bar {
+    background-color: #4caf50;  /* Màu xanh lá cây */
+    height: 100%;
+    width: 0;
+    transition: width 1s ease-in-out;
+    border-radius: 8px;
+}
+
+/* Các mục so sánh file */
+.file-comparison {
+    background-color: #ffffff;  /* Nền trắng sáng */
+    border-radius: 12px;
+    margin-bottom: 30px;
+    padding: 25px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1100px;
+    transition: all 0.3s ease-in-out;
+}
+
+.file-comparison:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+/* Cải thiện hiển thị các mục so sánh file */
+.diff-container {
+    margin-top: 20px;
+    padding-left: 15px;
+}
+
+.diff-item {
+    margin-bottom: 10px;
+}
+
+/* Đánh dấu tên file */
+.file-name {
+    color: #2196f3;  /* Màu xanh dương */
+    font-weight: bold;
+}
+
+/* Style cho các mục và hover */
+.label {
+    font-weight: bold;
+    color: #333;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.diff-local {
+    color: #e57373;  /* Màu đỏ nhạt */
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.diff-remote {
+    color: #81c784;  /* Màu xanh lá cây nhạt */
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+
+/* Sự khác biệt */
+.diff-difference {
+    font-weight: 500;
+    color: #f57c00;  /* Màu cam cho sự khác biệt */
+    background-color: #fff3e0;  /* Nền cam nhạt */
+    padding: 8px;
+    border-radius: 6px;
+}
+
+/* Các mục hiển thị sự khác biệt */
+.diff-item span {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Các mục có sự thay đổi */
+.diff-item .label.diff-difference {
+    color: #f57c00;
+    font-weight: bold;
+}
+
+.diff-container {
+    margin-top: 15px;
+    padding-left: 15px;
+    padding-bottom: 15px;
+    border-left: 3px solid #4caf50;
+}
+
+/* Phần hiển thị thông tin lỗi */
+.error-message {
+    color: #f44336;  /* Màu đỏ tươi */
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* Các nút điều khiển */
+.button {
+    background-color: #4caf50;  /* Màu xanh lá cây */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button:hover {
+    background-color: #45a049;  /* Màu xanh lá cây đậm hơn */
+    transform: translateY(-2px);
+}
+
+.button:active {
+    background-color: #388e3c;  /* Màu xanh lá cây khi nhấn */
+    transform: translateY(1px);
+}
+
+/* Phần thanh menu hoặc sidebar */
+.sidebar {
+    background-color: #263238;  /* Nền xám đậm */
+    width: 250px;
+    height: 100vh;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar a {
+    color: #ffffff;  /* Chữ trắng */
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.sidebar a:hover {
+    color: #4caf50;  /* Chữ màu xanh lá cây khi hover */
+}
+
+/* Phần hiển thị nội dung chính */
+.main-content {
+    margin-left: 270px;  /* Khoảng cách với sidebar */
+    padding: 30px;
+    width: 100%;
+}
+
+/* Footer */
+footer {
+    width: 100%;
+    background-color: #263238;  /* Nền xám đậm */
+    color: #ffffff;
+    padding: 15px;
+    text-align: center;
+    font-size: 0.9rem;
+    margin-top: 30px;
+}
+
+

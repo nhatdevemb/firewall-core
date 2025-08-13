@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Trình quản lý BMC IDS/IPS</title>
+    <!-- plugins:css -->
+         <!-- Thêm CSS của DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- Thêm jQuery từ CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <!-- Thêm DataTables JS từ CDN -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
+
+    <link rel="stylesheet" href="../../assets/css/style_capnhat.css">
+    <link rel="shortcut icon" href="../../assets/images/iconnho.png" />
+
+    <!-- chinh sua file -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:../../partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+          <a class="sidebar-brand brand-logo" href="../../index.html"><img src="../../assets/images/IDDS.png" alt="logo" /></a>
+          <a class="sidebar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+        </div>
+        <ul class="nav">
+          <li class="nav-item profile">
+          </li>
+          <li class="nav-item nav-category">
+            <span class="nav-link">Navigation</span>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../index.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-speedometer"></i>
+              </span>
+              <span class="menu-title">Trang chủ</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+              <span class="menu-icon">
+                <i class="mdi mdi-laptop"></i>
+              </span>
+              <span class="menu-title">Rule Database</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="ui-basic">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="checkDatabase.html">Kiểm tra Database</a></li>
+                <li class="nav-item"> <a class="nav-link" href="suarule.html">Tìm và sửa Rules</a></li>
+                <li class="nav-item"> <a class="nav-link" href="capnhatrule.html">Cập nhật Rules</a></li>
+            </div>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="switchmode.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-playlist-play"></i>
+              </span>
+              <span class="menu-title">Chuyển chế độ IDS/IPS</span>
+            </a>
+          </li>
+          <!-- <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/forms/basic_elements.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-playlist-play"></i>
+              </span>
+              <span class="menu-title">Form Elements</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/tables/basic-table.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-table-large"></i>
+              </span>
+              <span class="menu-title">Tables</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/charts/chartjs.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-chart-bar"></i>
+              </span>
+              <span class="menu-title">Charts</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/icons/mdi.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-contacts"></i>
+              </span>
+              <span class="menu-title">Icons</span>
+            </a>
+          </li> -->
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
+              <span class="menu-icon">
+                <i class="mdi mdi-security"></i>
+              </span>
+              <span class="menu-title">Sửa cấu hình</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="auth">
+              <ul class="nav flex-column sub-menu">
+                <!-- <li class="nav-item"> <a class="nav-link" href="../../pages/samples/blank-page.html"> Blank Page </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html"> 404 </a></li>
+                <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-500.html"> 500 </a></li> -->
+                <li class="nav-item"> <a class="nav-link" href="/pages/ui-features/setting.html"> Config </a></li>
+                <!-- <li class="nav-item"> <a class="nav-link" href="../../pages/samples/register.html"> Register </a></li> -->
+              </ul>
+            </div>
+          </li>
+          <!-- <li class="nav-item menu-items">
+            <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-file-document-box"></i>
+              </span>
+              <span class="menu-title">Documentation</span>
+            </a>
+          </li> -->
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="javascript:void(0);" onclick="toggleFirewallPopup()">
+                <span class="menu-icon">
+                    <i class="mdi mdi-lock"></i> <!-- Thay icon phù hợp -->
+                </span>
+                <span class="firewall-menu-item"> 
+                    Yêu cầu truy cập mới 
+                    <span id="firewall-badge" class="firewall-badge">0</span>
+                </span>
+            </a>
+        </li>
+
+        <!-- Popup hiển thị request -->
+        <div id="firewall-popup-container" class="firewall-popup-overlay">
+            <div class="firewall-popup-content">
+                <!-- Header với nút đóng góc phải -->
+                <div class="firewall-popup-header">
+                    <span>New Firewall Requests</span>
+                </div>
+
+                <!-- Bảng hiển thị request -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th>Name</th> <!-- Thêm cột "Name" -->
+                        </tr>
+                    </thead>
+                    <tbody id="firewall-popup-table">
+                        <!-- Dữ liệu động sẽ được thêm vào đây -->
+                    </tbody>
+                </table>
+
+                <!-- Footer với 2 nút -->
+                <div class="firewall-popup-footer">
+                    <button class="firewall-log-btn">View Full Log</button>
+                    <button class="firewall-footer-close-btn" onclick="closeFirewallPopup()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 Popup View Full Log -->
+        <div id="firewall-full-log-container" class="firewall-popup-overlay">
+            <div class="firewall-popup-content">
+                <!-- Header -->
+                <div class="firewall-popup-header">
+                    <span>Firewall Full Log</span>
+                </div>
+
+                <!-- Bảng hiển thị log đầy đủ -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th>Name</th> <!-- Thêm cột "Name" -->
+                        </tr>
+                    </thead>
+                    <tbody id="firewall-full-log-table">
+                        <!-- 🔥 Dữ liệu từ file log sẽ được load vào đây -->
+                    </tbody>
+                </table>
+
+                <!-- Nút đóng -->
+                <div class="firewall-popup-footer">
+                    <button class="firewall-footer-close-btn" onclick="closeFullLogPopup()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="../../assets/js/firewall.js"></script>
+
+
+
+        <li class="nav-item menu-items">
+          <a class="nav-link" href="../../pages/tables/basic-table.html">
+            <span class="menu-icon">
+              <i class="mdi mdi-table-large"></i>
+            </span>
+            <span class="menu-title">Cách ly & Khôi phục</span>
+          </a>
+        </li>
+
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="../../login">
+              <span class="menu-icon">
+                <i class="mdi mdi-logout"></i>
+              </span>
+              <span class="menu-title">Đăng xuất</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:../../partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+          <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+            <a class="navbar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+          </div>
+          <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+              <span class="mdi mdi-format-line-spacing"></span>
+            </button>
+          </div>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+    
+          <div class="config-container">
+
+            <!-- Tabs điều hướng -->
+            <div class="config-tabs">
+                <div class="config-tab active" data-file="suricata" onclick="openTab('suricata')">suricata.yaml</div>
+                <div class="config-tab" data-file="classification" onclick="openTab('classification')">classification.config</div>
+                <div class="config-tab" data-file="threshold" onclick="openTab('threshold')">threshold.config</div>
+                <div class="config-tab" data-file="filebeat" onclick="openTab('filebeat')">filebeat.yml</div>
+            </div>
+        
+            <!-- Nội dung chỉnh sửa file -->
+            <div id="suricata" class="config-content active">
+                <pre id="editor-suricata"></pre>
+                <button class="config-save-button" data-file="suricata">Lưu</button>
+                <span class="save-message" id="save-message-suricata"></span>
+                <div class="loading-spinner" id="loading-spinner-suricata"></div> <!-- Di chuyển spinner ra ngoài nút -->
+            </div>
+        
+            <div id="classification" class="config-content">
+                <pre id="editor-classification"></pre>
+                <button class="config-save-button" data-file="classification">Lưu</button>
+                <span class="save-message" id="save-message-classification"></span>
+                <div class="loading-spinner" id="loading-spinner-classification"></div> <!-- Di chuyển spinner ra ngoài nút -->
+            </div>
+        
+            <div id="threshold" class="config-content">
+                <pre id="editor-threshold"></pre>
+                <button class="config-save-button" data-file="threshold">Lưu</button>
+                <span class="save-message" id="save-message-threshold"></span>
+                <div class="loading-spinner" id="loading-spinner-threshold"></div> <!-- Di chuyển spinner ra ngoài nút -->
+            </div>
+        
+            <div id="filebeat" class="config-content">
+                <pre id="editor-filebeat"></pre>
+                <button class="config-save-button" data-file="filebeat">Lưu</button>
+                <span class="save-message" id="save-message-filebeat"></span>
+                <div class="loading-spinner" id="loading-spinner-filebeat"></div> <!-- Di chuyển spinner ra ngoài nút -->
+            </div>
+        
+            <!-- Thông báo lỗi -->
+            <div id="error-container" style="display:none;">
+                <h3>Thông báo lỗi:</h3>
+                <ul id="error-list"></ul>
+            </div>
+        </div>      
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+                  
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="../../assets/js/off-canvas.js"></script>
+  <script src="../../assets/js/hoverable-collapse.js"></script>
+  <script src="../../assets/js/misc.js"></script>
+  <script src="../../assets/js/settings.js"></script>
+  <script src="../../assets/js/todolist.js"></script>
+  <script src="../../assets/js/chinhsuafile.js"></script>
+
+
+
+    <!-- container-scroller -->
+  <!-- plugins:js -->
+
+  <!-- endinject -->
+
+  
+  <!-- endinject -->
+  <!-- Custom js for this page -->
+  <script src="assets/js/dashboard.js"></script>
+  <!-- End custom js for this page -->
+</body>
+
+</html>

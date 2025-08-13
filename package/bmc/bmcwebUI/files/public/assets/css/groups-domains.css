@@ -1,0 +1,934 @@
+
+
+/* Page Header */
+.page-header {
+    margin: 24px 0;
+    margin-top: -8px;
+    padding: 5px 18px;
+    background: #222529;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #5a6270, #4a90e2);
+    opacity: 0.7;
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    margin-top: 8px;
+    font-weight: 600;
+    color: #ebedf0;
+    letter-spacing: 0.2px;
+}
+
+/* Box Styling */
+.box {
+    background: #212428;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    margin-bottom: 24px;
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    border: 1px solid #2a2d33;
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+
+.box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.box-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid #303338;
+    background: #25272b;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #3d3d3d;
+    padding: 10px;
+}
+
+/* Định dạng phần tiêu đề và checkbox ngang hàng */
+.box-header .header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.box-header .box-title {
+    color: #fff;
+    font-size: 18px;
+    margin: 0;
+}
+
+/* Box Body */
+.box-body {
+    padding: 24px;
+    padding: 15px;
+}
+
+/* Navigation Tabs */
+.nav-tabs-custom {
+    margin-bottom: 20px;
+    background: #25272b;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #2a2d33;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid #2a2d33;
+    display: flex;
+    background: #1e2023;
+}
+
+.nav-tabs li {
+    flex: 0 0 auto;
+    text-align: center;
+}
+
+.nav-tabs li a {
+    display: block;
+    color: #b0b8c4;
+    padding: 8px 14px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border: none;
+    transition: all 0.3s ease;
+    border-radius: 4px 4px 0 0;
+    text-decoration: none;
+}
+
+.nav-tabs li.active a,
+.nav-tabs li a:hover {
+    background: #4a90e2;
+    color: #fff;
+    box-shadow: inset 0 -1px 0 #3a7bd5;
+}
+
+.tab-content {
+    background: #212428;
+    border: 1px solid #2a2d33;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 16px;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #d4d7dc;
+    margin-bottom: 6px;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    background: #26282d;
+    border: 1px solid #33363c;
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-size: 0.85rem;
+    color: #e6e8eb;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+}
+
+.form-control:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 4px rgba(74, 144, 226, 0.15);
+    outline: none;
+    background-color: #3d3d3d;
+}
+
+.form-control::placeholder {
+    color: #6c737d;
+    font-weight: 400;
+}
+
+/* Selectpicker (Dropdown) Styling */
+.selectpicker {
+    background: #26282d;
+    border: 1px solid #33363c;
+    color: #e6e8eb;
+    padding: 7px 10px;
+    border-radius: 5px;
+    width: 100%;
+    font-size: 0.85rem;
+}
+
+.selectpicker:focus {
+    border-color: #4a90e2;
+}
+
+/* Bootstrap Select Dropdown */
+.bootstrap-select .dropdown-toggle {
+    background: #26282d !important;
+    border: 1px solid #33363c !important;
+    color: #e6e8eb !important;
+    padding: 7px 10px !important;
+    border-radius: 5px !important;
+    font-size: 0.85rem !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #fff;
+}
+
+.bootstrap-select .dropdown-toggle:focus {
+    border-color: #4a90e2 !important;
+    box-shadow: 0 0 4px rgba(74, 144, 226, 0.15) !important;
+    outline: none !important;
+}
+
+.bootstrap-select .dropdown-menu {
+    background: #26282d;
+    border: 1px solid #33363c;
+    border-radius: 5px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    margin-top: 3px;
+    background-color: #2d2d2d;
+}
+
+.bootstrap-select .dropdown-item {
+    color: #d1d4d9;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    color: #fff;
+}
+
+.bootstrap-select .dropdown-item:hover,
+.bootstrap-select .dropdown-item.active {
+    background: #4a90e2;
+    color: #fff;
+}
+
+/* Checkbox styling */
+.select-checkbox {
+    text-align: center;
+    position: relative;
+}
+
+.select-checkbox:before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 18px;
+    margin: 0 auto;
+    cursor: pointer;
+    border: 2px solid #4a4a4a;
+    border-radius: 3px;
+    background-color: #2d2d2d;
+    transition: all 0.3s ease;
+}
+
+table.dataTable td.select-checkbox.selected:before {
+    background-color: #4a90e2;
+    border-color: #4a90e2;
+}
+
+table.dataTable td.select-checkbox.selected:after {
+    content: '\2713';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 12px;
+}
+
+/* Delete button styling */
+.btn-danger.btn-xs {
+    padding: 2px 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.btn-danger.btn-xs:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.btn-danger.btn-xs i {
+    font-size: 14px;
+}
+
+/* Bulk delete button */
+#bulk-delete {
+    margin-left: 10px;
+    padding: 4px 8px;
+    font-size: 13px;
+}
+
+#bulk-delete i {
+    margin-right: 5px;
+}
+
+/* Center align checkbox column */
+.dt-center {
+    text-align: center;
+}
+
+/* Tùy chỉnh cột checkbox */
+table.dataTable thead th:first-child {
+    background: #25272b;
+    border-bottom: 1px solid #4a90e2;
+    padding: 12px 16px;
+    text-align: center;
+}
+
+/* Ẩn biểu tượng checkbox mặc định trong tiêu đề */
+table.dataTable thead .select-checkbox:before,
+table.dataTable thead .select-checkbox:after {
+    display: none !important;
+}
+
+/* Tùy chỉnh kiểu hiển thị checkbox trong các hàng */
+table.dataTable tbody td.select-checkbox:before {
+    border: 1px solid #4a90e2;
+    border-radius: 3px;
+    background: #26282d;
+    width: 14px;
+    height: 14px;
+}
+
+table.dataTable tbody tr.selected td.select-checkbox:after {
+    content: '\2713';
+    font-size: 12px;
+    color: #fff;
+    background: none;
+    text-shadow: none;
+    position: absolute;
+    top: 30%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}
+
+table.dataTable tbody tr.selected td.select-checkbox:before {
+    background: #4a90e2;
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 14px;
+    font-weight: 500;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-primary {
+    background: #4a90e2;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #3a7bd5;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(74, 144, 226, 0.2);
+}
+
+.btn-default {
+    background: #27292e;
+    border: 1px solid #35383f;
+    color: #d4d7dc;
+}
+
+.btn-default:hover {
+    background: #31343a;
+    border-color: #45484f;
+    transform: translateY(-1px);
+}
+
+.text-red {
+    color: #e63946 !important;
+}
+
+/* Toolbar - Sửa để căn chỉnh các nút "Add to denied domains" và "Add to allowed domains" */
+.btn-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    justify-content: flex-end;
+    align-items: center; /* Đảm bảo các nút thẳng hàng theo chiều dọc */
+}
+
+.btn-group {
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-group .btn {
+    margin: 0; /* Loại bỏ margin không cần thiết */
+}
+
+/* Table Styling */
+table.dataTable {
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #212428;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table.dataTable thead th {
+    background: #25272b;
+    color: #ebedf0;
+    padding: 12px 16px;
+    font-weight: 500;
+    text-align: left;
+    border-bottom: 1px solid #4a90e2;
+    font-size: 0.95rem;
+}
+
+table.dataTable tbody tr {
+    transition: background 0.3s ease;
+}
+
+table.dataTable tbody tr:hover {
+    background: #27292e;
+}
+
+table.dataTable tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #303338;
+    color: #d4d7dc;
+    font-size: 0.9rem;
+}
+
+/* Filter Types */
+.box-header .filter_types {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  gap: 20px;
+}
+
+.filter_types .line {
+  display: flex;
+  gap: 15px;
+}
+
+.filter_types span {
+  display: flex;
+  align-items: center;
+}
+
+.filter_types label {
+  margin-left: 6px;
+  font-weight: 500;
+  color: #d4d7dc;
+  font-size: 0.9rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.filter_types input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+.filter_types {
+  margin-top: 0 !important;
+}
+
+/* Notes and Links */
+.box-body p {
+    color: #a0a8b3;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+.box-body a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 400;
+    transition: color 0.3s ease;
+}
+
+.box-body a:hover {
+    color: #3a7bd5;
+    text-decoration: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .page-header h1 {
+        font-size: 1.7rem;
+    }
+
+    .box-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .nav-tabs li a {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+
+    .btn {
+        padding: 7px 14px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 12px;
+        margin: 12px 0;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .box-body {
+        padding: 16px;
+    }
+
+    .form-control {
+        padding: 7px 10px;
+    }
+
+    .nav-tabs {
+        flex-direction: column;
+    }
+
+    .nav-tabs li {
+        text-align: left;
+    }
+
+    .btn-toolbar {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .btn-group {
+        width: 100%;
+        margin-bottom: 8px; /* Thêm khoảng cách giữa các nút khi responsive */
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    /* Responsive filter types */
+    .box-header .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .box-header .filter_types {
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+}
+
+/* Animations */
+.fade {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.fade.in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #25272b;
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a7bd5;
+}
+
+/* Accessibility Enhancements */
+:focus {
+    outline: 2px solid #4a90e2;
+    outline-offset: 2px;
+}
+
+button:focus,
+input:focus,
+select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+}
+
+/* Tooltip Styling */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #27292e;
+    color: #d4d7dc;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 6px;
+}
+
+[data-tooltip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #27292e;
+    margin-bottom: 1px;
+}
+
+/* Table styling */
+.table {
+    background-color: transparent;
+    color: #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.table-bordered {
+    border: 1px solid #2d2d2d;
+}
+
+.table th, .table td {
+    border-top: 1px solid #2d2d2d;
+    padding: 8px;
+    vertical-align: middle;
+}
+
+/* Input and select styling */
+.form-control {
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    color: #fff;
+}
+
+.form-control:focus {
+    background-color: #3d3d3d;
+    border-color: #4d4d4d;
+    color: #fff;
+}
+
+select.form-control {
+    background-color: #2d2d2d;
+    color: #fff;
+}
+
+/* Domain styling */
+.domain-name {
+    color: #fff;
+}
+
+.domain-name.deny {
+    color: #ff4444;
+}
+
+/* Status toggle */
+.toggle.btn {
+    min-width: 80px !important;
+}
+
+.toggle-on {
+    background-color: #28a745 !important;
+}
+
+.toggle-off {
+    background-color: #dc3545 !important;
+}
+
+/* Group selector */
+.bootstrap-select > .dropdown-toggle {
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #fff;
+}
+
+.bootstrap-select .dropdown-menu {
+    background-color: #2d2d2d;
+}
+
+.bootstrap-select .dropdown-item {
+    color: #fff;
+}
+
+.bootstrap-select .dropdown-item:hover {
+    background-color: #3d3d3d;
+}
+
+/* Search box */
+.dataTables_filter input {
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    color: #fff;
+    padding: 5px 10px;
+}
+
+/* Pagination */
+.page-link {
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #fff;
+}
+
+.page-link:hover {
+    background-color: #3d3d3d;
+    border-color: #4d4d4d;
+    color: #fff;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Delete button */
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    padding: 2px 8px;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Comment input */
+input[type="text"].form-control {
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    color: #fff;
+}
+
+input[type="text"].form-control::placeholder {
+    color: #6c757d;
+}
+
+/* Table header */
+thead th {
+    background-color: #2d2d2d;
+    border-bottom: 2px solid #3d3d3d !important;
+}
+
+/* Nothing selected text */
+.nothing-selected {
+    color: #6c757d;
+}
+
+/* Enabled/Disabled status */
+.status-enabled {
+    color: #28a745;
+}
+
+.status-disabled {
+    color: #dc3545;
+}
+
+/* DataTables specific */
+.dataTables_info,
+.dataTables_length label {
+    color: #fff;
+}
+
+.dataTables_length select {
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #fff;
+}
+
+/* Đảm bảo khối chứa các nút điều khiển hiển thị */
+div.dt-buttons {
+  float: left;
+  margin-bottom: 10px;
+  display: block !important;
+}
+
+/* Đảm bảo từng nút hiển thị và căn chỉnh đúng */
+.dt-buttons .datatable-bt {
+  margin-right: 5px;
+  display: inline-block !important;
+  background: #27292e;
+  border: 1px solid #35383f;
+  color: #d4d7dc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dt-buttons .datatable-bt:hover {
+  background: #31343a;
+  border-color: #45484f;
+}
+
+/* Đảm bảo nút Delete Selected có màu đỏ */
+.dt-buttons .deleteSelected {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: #fff;
+}
+
+.dt-buttons .deleteSelected:hover {
+  background: #c82333;
+  border-color: #bd2130;
+}
+
+.dt-buttons .deleteSelected:disabled {
+  background: #6c757d;
+  border-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Định dạng nút Delete (thùng rác) */
+.delete-row {
+  padding: 2px 5px;
+}
+
+/* Đảm bảo các cột căn giữa nếu cần */
+table.dataTable td.text-center {
+  vertical-align: middle;
+}
+
+/* Đảm bảo biểu tượng thùng rác có màu trắng */
+.delete-row i.fa-trash-o {
+  color: #fff;
+}
+
+/* Alerts */
+.alert {
+  margin-bottom: 15px;
+}
+
+.alert-dismissible .close {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.alert-success {
+  background-color: #1a3c34;
+  border-color: #2e7d32;
+  color: #4caf50;
+}
+
+.alert-info {
+  background-color: #1e3a5f;
+  border-color: #2e5f8a;
+  color: #4a90e2;
+}
+
+.alert-warning {
+  background-color: #4d3a1b;
+  border-color: #8a6d3b;
+  color: #ffca28;
+}
+
+.alert-danger {
+  background-color: #4f1c24;
+  border-color: #d32f2f;
+  color: #ef5350;
+}
+
+
+/* Custom iPhone-like toggle switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #34C759; /* Màu xanh lá giống iPhone khi bật */
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}

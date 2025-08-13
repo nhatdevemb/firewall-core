@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Trình quản lý BMC IDS/IPS</title>
+
+
+  <!-- plugins:css -->
+    <!-- Thêm CSS của DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- Thêm jQuery từ CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <!-- Thêm DataTables JS từ CDN -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
+     
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End Plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+
+    <link rel="stylesheet" href="../../assets/css/style_capnhat.css">
+    <link rel="stylesheet" href="../../assets/css/capnhat.css">
+    <link rel="stylesheet" href="../../assets/css/importrules.css">
+    <link rel="stylesheet" href="../../assets/css/updatePopup.css">
+
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="../../assets/images/iconnho.png" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <div id="sidebar-container"></div>
+      <script>
+          $(document).ready(function() {
+              $('#sidebar-container').load("../../partials/_sidebar.html");
+          });
+      </script>
+    </div>
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:../../partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+          <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+            <a class="navbar-brand brand-logo-mini" href="../../index.html"><img src="../../assets/images/logo-mini.svg" alt="logo" /></a>
+          </div>
+          <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+              <span class="mdi mdi-format-line-spacing"></span>
+            </button>
+          </div>
+        </nav>
+
+              <div class="main-panel">
+                <div class="content-wrapper">
+                  <div class="page-header">
+                    <h3 class="page-title"> Quản lý địa chỉ MAC </h3>
+                    <nav aria-label="breadcrumb">
+                      <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Firewall</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Quản lý MAC</li>
+                      </ol>
+                    </nav>
+                  </div>
+              
+
+
+                    <div class="row">
+                      <!-- Form nhập IP -->
+                      <div class="col-lg-6 grid-margin stretch-card">
+                          <div class="card" style="border-radius: 8px;">
+                              <div class="card-body">
+                                  <h4 class="card-title">Nhập địa chỉ IP</h4>
+                                  <p class="card-description">Nhập IP để kiểm tra trạng thái của địa chỉ MAC</p>
+                                  <div class="input-group">
+                                      <input type="text" id="ipAddress" class="form-control" placeholder="Nhập địa chỉ IP (VD: 192.168.1.10)" 
+                                          style="font-size: 16px; font-weight: 300; color: #65ff28;">
+                                      <div class="input-group-append">
+                                          <button class="btn btn-primary" style="border-radius: 6px;" onclick="checkIP()">Kiểm tra</button>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  
+                      <!-- Kết quả hiển thị -->
+                      <div class="col-lg-12 grid-margin stretch-card">
+                          <div class="card" style="border-radius: 8px;">
+                              <div class="card-body">
+                                  <h4 class="card-title">Kết quả kiểm tra</h4>
+                                  <p class="card-description">Thông tin liên quan đến địa chỉ MAC</p>
+                                  <div class="table-responsive">
+                                      <table class="table">
+                                          <thead>
+                                              <tr>
+                                                  <th>Địa chỉ MAC</th>
+                                                  <th>Chủ sở hữu</th>
+                                                  <th>Pkts</th>
+                                                  <th>Bytes</th>
+                                                  <th>Target</th>
+                                                  <th>Prot</th>
+                                                  <th>Opt</th>
+                                                  <th>In</th>
+                                                  <th>Out</th>
+                                                  <th>Source</th>
+                                                  <th>Destination</th>
+                                                  <th>Trạng thái</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody id="macInfoTable">
+                                              <!-- Kết quả sẽ được hiển thị ở đây -->
+                                          </tbody>
+                                      </table>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  
+                  
+                  <script src="../../assets/js/addrulesFirewall.js"></script> <!-- Đường dẫn tới script xử lý -->
+                  
+
+            </div>
+            
+
+            </div>
+
+
+
+      </nav>
+
+      <!-- Popup thông báo -->
+      <!-- Popup thông báo -->
+      <div id="notificationPopup" class="popup-overlay">
+        <div class="popup-message">
+            <p id="popupMessage"></p>
+            <button id="closePopupBtn" class="popup-close-btn">Đóng</button>
+        </div>
+      </div>
+
+                                                                <!-- Modal để hiển thị sự khác biệt -->
+
+      <!-- partial -->
+      <footer class="footer">
+        <div class="d-sm-flex justify-content-center justify-content-sm-between">
+          <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bmctech.vn 2024</span>
+          <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Security <a href="https://bmctech.vn/" target="_blank">BMC</a> from bmctech.vn</span>
+        </div>
+      </footer>
+
+       <!-- <div class="main-panel"> -->
+        <!-- <div class="content-wrapper"> -->
+        <!-- </div> -->
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+
+        <!-- partial -->
+      <!-- </div> -->
+  
+
+      <!-- main-panel ends -->
+    </div>
+
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+
+  <script src="../../assets/js/off-canvas.js"></script>
+  <script src="../../assets/js/hoverable-collapse.js"></script>
+  <script src="../../assets/js/misc.js"></script>
+  <script src="../../assets/js/settings.js"></script>
+  <script src="../../assets/js/todolist.js"></script>
+  <!-- <script src="../../assets/js/capnhatrule.js"></script> -->
+  <script src="../../assets/js/kichhoatnut.js"></script>
+  <script src="../../assets/js/downloadrule.js"></script>
+  <script src="../../assets/js/tairule.js"></script>
+  <script src="../../assets/js/disableNut.js"></script>
+  
+  
+  
+
+
+
+
+    <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- endinject -->
+
+  
+  <!-- endinject -->
+  <!-- Custom js for this page -->
+  <script src="assets/js/dashboard.js"></script>
+  <!-- End custom js for this page -->
+</body>
+
+</html>

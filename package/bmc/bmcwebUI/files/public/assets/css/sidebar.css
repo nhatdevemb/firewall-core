@@ -1,0 +1,109 @@
+/* Tùy chỉnh màu sắc cho các icon trong sidebar */
+.nav-item .mdi-speedometer { color: #00d25b; }  /* Xanh lá - Trang chủ */
+.nav-item .mdi-contacts { color: #fc424a; }     /* Đỏ - Luật áp dụng */
+.nav-item .mdi-chart-bar { color: #ffab00; }    /* Vàng - Hành vi truy cập */
+.nav-item .mdi-table-large { color: #8f5fe8; }  /* Tím - Cách ly & Khôi phục */
+.nav-item .mdi-playlist-play { color: #0090e7; } /* Xanh dương - Quản lý chống virus */
+.nav-item .mdi-web-box { color: #f9a825; }      /* Vàng cam - Chặn truy cập web */
+.nav-item .mdi-lock { color: #e91e63; }         /* Hồng - Yêu cầu truy cập mới */
+.nav-item .mdi-logout { color: #ff5722; }       /* Cam - Đăng xuất */
+.nav-item .mdi-link-off { color: #607d8b; }     /* Xám - Hủy liên kết */
+
+
+  /* Căn chỉnh tiêu đề và số liệu trên cùng hàng */
+  .page-header .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* Căn trái tiêu đề */
+  .page-header .header-content .page-title {
+    text-align: left;
+    margin: 0;
+  }
+
+  /* Căn phải số liệu */
+  .page-header .header-content .stats-container {
+    display: flex;
+    gap: 5px;
+  }
+
+  /* Kiểu dáng cho số liệu */
+  .page-header .header-content .stats-container .label {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+    line-height: normal;
+  }
+
+  /* Màu sắc cho các label */
+  .page-header .header-content .stats-container .label.bg-red {
+    background-color: #dd4b39;
+    color: #fff;
+  }
+  .page-header .header-content .stats-container .label.bg-green {
+    background-color: #00a65a;
+    color: #fff;
+  }  
+  
+
+/* Đảm bảo nav-link hiển thị dưới dạng flex để căn chỉnh các phần tử */
+.nav-item.menu-items .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 15px; /* Điều chỉnh padding nếu cần */
+}
+
+/* Căn trái tiêu đề */
+.nav-item.menu-items .nav-link .menu-title {
+  text-align: left;
+  flex: 1; /* Chiếm không gian còn lại để đẩy stats-container sang phải */
+  margin-left: -1px; /* Khoảng cách giữa icon và tiêu đề */
+}
+
+/* Căn chỉnh stats-container sang phải */
+.nav-item.menu-items .nav-link .stats-container {
+  display: flex;
+  gap: 5px; /* Khoảng cách giữa các nhãn */
+}
+
+/* Kiểu dáng cho nhãn, tự động điều chỉnh kích thước dựa trên nội dung */
+.nav-item.menu-items .nav-link .stats-container .label {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  line-height: normal;
+  /* Loại bỏ min-width cố định, thay bằng padding để tự động vừa nội dung */
+  display: inline-block;
+  white-space: nowrap; /* Ngăn nội dung xuống dòng */
+}
+
+/* Màu sắc cho các nhãn */
+.nav-item.menu-items .nav-link .stats-container .label.bg-red {
+  background-color: #dd4b39;
+  color: #fff;
+}
+
+.nav-item.menu-items .nav-link .stats-container .label.bg-green {
+  background-color: #00a65a;
+  color: #fff;
+}
+
+.nav-item.menu-items .nav-link .stats-container .label.bg-orange {
+  background-color: #f39c12; /* Yellow-Orange */
+  color: #fff;
+}
+
+.nav-item.menu-items .nav-link .stats-container .label.bg-blue {
+  background-color: #007bff; /* Blue */
+  color: #fff;
+}

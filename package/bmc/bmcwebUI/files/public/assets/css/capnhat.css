@@ -1,0 +1,522 @@
+/* Cài đặt cơ bản cho toàn bộ body của trang, dịch sang phải */
+body {
+  font-family: 'Roboto', sans-serif; /* Chọn font chữ hiện đại */
+  color: #f5f5f5; /* Màu chữ sáng */
+  line-height: 1.6; /* Khoảng cách dòng dễ đọc */
+  transition: all 0.3s ease; /* Hiệu ứng mượt mà khi có thay đổi */
+}
+
+h5, h2 {
+  font-weight: 600; /* Đặt độ đậm cho tiêu đề */
+}
+
+/* Cài đặt cho phần quản lý feeds */
+.feeds-management-container {
+  background-color: #3f3f3f; /* Màu nền của container quản lý feeds */
+  width: 100%; /* Đặt chiều rộng của container */
+  padding: 20px; /* Đệm bên trong container */
+  padding-left: 20px; /* Dịch toàn bộ trang sang phải 200px */
+  border-radius: 10px; /* Bo tròn góc container */
+  color: #f5f5f5; /* Màu chữ sáng */
+  margin-top: 10px; /* Giảm khoảng cách phía trên */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Đổ bóng cho hiệu ứng chiều sâu */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng mượt khi hover */
+}
+
+.feeds-management-container:hover {
+  transform: translateY(-3px); /* Dịch nhẹ lên khi hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* Hiệu ứng bóng khi hover */
+}
+
+/* Header của trang */
+.header {
+  display: flex; /* Sử dụng flexbox để canh giữa nội dung */
+  justify-content: space-between; /* Khoảng cách giữa tiêu đề và nút thêm feed mới */
+  align-items: center; /* Canh giữa theo chiều dọc */
+  margin-bottom: 10px; /* Giảm khoảng cách dưới của header */
+  border-bottom: 1px solid #999; /* Đường kẻ ngang dưới header */
+  padding-bottom: 10px; /* Khoảng cách dưới của header để nhìn dễ hơn */
+}
+
+.header h2 {
+  color: #fff; /* Màu trắng cho tiêu đề */
+  margin: 0; /* Xóa khoảng cách mặc định */
+  font-size: 1.65rem;
+}
+
+/* Nút thêm feed mới */
+.add-new-feed-btn {
+  margin-left: auto; /* Đẩy nút sang phải */
+  background-color: #28a745; /* Màu xanh cho nút */
+  border: none; /* Xóa viền */
+  padding: 8px 16px; /* Khoảng cách bên trong nút */
+  border-radius: 5px; /* Bo góc nút */
+  color: #fff; /* Màu chữ trắng */
+  cursor: pointer; /* Con trỏ dạng bàn tay khi hover */
+  transition: background-color 0.3s, transform 0.2s; /* Hiệu ứng hover */
+}
+
+.add-new-feed-btn:hover {
+  background-color: #218838; /* Đổi màu khi hover */
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+}
+
+/* Cài đặt cho từng thẻ feed */
+.feed-card {
+  background-color: #252525; /* Màu nền tối hơn cho thẻ feed */
+  padding: 20px; /* Đệm bên trong thẻ */
+  border-radius: 8px; /* Bo tròn góc thẻ */
+  margin-bottom: 20px; /* Khoảng cách dưới thẻ */
+  margin-top: 30px; /* Giảm khoảng cách phía trên */
+  border: 1px solid #333; /* Viền màu tối */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* Đổ bóng tạo chiều sâu */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng mượt khi hover */
+  width: calc(100% - 220px); /* Kéo dài chiều rộng thẻ feed để căn chỉnh */
+  margin-right: auto; /* Đảm bảo căn lề hợp lý */
+}
+
+.feed-card:hover {
+  transform: translateY(-3px); /* Dịch nhẹ lên khi hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* Tăng chiều sâu khi hover */
+}
+
+/* Header của mỗi thẻ feed */
+.feed-header {
+  display: flex; /* Sử dụng flexbox cho bố cục header */
+  justify-content: space-between; /* Khoảng cách giữa tiêu đề và nút trạng thái */
+  align-items: center; /* Canh giữa theo chiều dọc */
+  margin-bottom: 15px; /* Khoảng cách dưới của header */
+}
+
+.feed-header h5 {
+  color: #ffcc00; /* Màu vàng cho tiêu đề của feed */
+  margin: 0; /* Xóa khoảng cách mặc định */
+  font-size: 1.185rem;
+}
+
+/* Nút trạng thái của feed (Enabled/Disabled) */
+.status-badge {
+  padding: 6px 12px; /* Khoảng cách trong của nút trạng thái */
+  background-color: #28a745; /* Màu nền xanh lá */
+  color: #fff; /* Màu chữ trắng */
+  border-radius: 5px; /* Bo tròn nút */
+  font-size: 0.9rem; /* Cỡ chữ nhỏ hơn */
+  font-weight: 500; /* Chữ đậm */
+  transition: background-color 0.3s ease; /* Hiệu ứng mượt khi đổi màu */
+}
+
+.status-badge.enabled {
+  background-color: #28a745; /* Màu xanh lá khi trạng thái là enabled */
+}
+
+.status-badge:hover {
+  background-color: #218838; /* Đổi màu khi hover */
+}
+
+/* Tabs trong mỗi thẻ feed */
+.tabs {
+  margin-bottom: 15px; /* Khoảng cách dưới của tabs */
+}
+
+.nav-tabs {
+  list-style-type: none; /* Xóa kiểu gạch đầu dòng */
+  padding: 0; /* Xóa đệm mặc định */
+  display: flex; /* Bố cục flexbox cho tabs */
+  border-bottom: 1px solid #444; /* Viền dưới của tabs */
+}
+
+.nav-tabs .tab {
+  padding: 10px 15px; /* Đệm cho tab */
+  cursor: pointer; /* Con trỏ hình bàn tay khi hover */
+  color: #f5f5f5; /* Màu chữ */
+  transition: background-color 0.3s; /* Hiệu ứng khi hover */
+  border-radius: 5px 5px 0 0; /* Bo tròn tab */
+}
+
+.nav-tabs .tab.active {
+  border-bottom: 2px solid #ffcc00; /* Đổi màu viền dưới khi active */
+  color: #ffcc00; /* Màu vàng khi tab được chọn */
+}
+
+.nav-tabs .tab:hover {
+  background-color: #333; /* Đổi màu nền khi hover */
+}
+
+.tab-content {
+  padding-top: 15px; /* Khoảng cách trên của nội dung tab */
+}
+
+/* Các nhãn và input trong tab */
+.tab-content label {
+  display: block; /* Hiển thị nhãn theo dạng block */
+  margin-bottom: 5px; /* Khoảng cách dưới của nhãn */
+  font-size: 1rem; /* Kích thước chữ của nhãn */
+}
+
+.tab-content input[type="text"],
+.tab-content select {
+  width: 100%; /* Chiều rộng 100% */
+  padding: 10px; /* Đệm bên trong */
+  margin-bottom: 15px; /* Khoảng cách dưới của input */
+  border: 1px solid #444; /* Viền tối */
+  border-radius: 5px; /* Bo tròn input */
+  background-color: #333; /* Nền tối */
+  color: #fff; /* Màu chữ trắng */
+  transition: border-color 0.3s; /* Hiệu ứng khi focus */
+}
+
+.tab-content input[type="text"]:focus,
+.tab-content select:focus {
+  border-color: #007bff; /* Đổi màu viền khi focus */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Hiệu ứng khi focus */
+}
+
+/* Phần ngày cập nhật */
+.tab-content .last-updated {
+  font-size: 0.85rem; /* Cỡ chữ nhỏ */
+  color: #b5b5b5; /* Màu xám nhạt */
+  margin-top: 10px; /* Khoảng cách trên */
+}
+
+/* Các nút Save Changes và Update */
+.buttons {
+  display: flex; /* Sử dụng flexbox để bố trí nút */
+  gap: 10px; /* Khoảng cách giữa các nút */
+}
+
+.buttons .save-changes,
+.buttons .update-btn {
+  padding: 8px 16px; /* Đệm bên trong nút */
+  border: none; /* Xóa viền */
+  border-radius: 5px; /* Bo tròn nút */
+  cursor: pointer; /* Con trỏ hình bàn tay khi hover */
+  font-size: 0.95rem; /* Cỡ chữ */
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s; /* Hiệu ứng hover */
+}
+
+.buttons .save-changes {
+  background-color: #007bff; /* Màu xanh cho nút Save */
+  color: #fff; /* Màu chữ trắng */
+}
+
+.buttons .save-changes:hover {
+  background-color: #0056b3; /* Đổi màu khi hover */
+  transform: translateY(-2px); /* Dịch nhẹ lên khi hover */
+}
+
+.buttons .update-btn {
+  background-color: #6c757d; /* Màu xám cho nút Update */
+  color: #fff; /* Màu chữ trắng */
+}
+
+.buttons .update-btn:disabled {
+  background-color: #6c757d; /* Màu xám khi bị vô hiệu */
+}
+
+.buttons .update-btn:hover:not(:disabled) {
+  background-color: #28a745; /* Màu xanh khi hover */
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  box-shadow: 0 4px 10px rgba(0, 40, 0, 0.2); /* Hiệu ứng đổ bóng */
+}
+
+/* Hiệu ứng tổng thể cho toàn trang */
+* {
+  transition: all 0.3s ease; /* Hiệu ứng mượt mà cho toàn bộ phần tử */
+}
+
+
+/* Cài đặt cho nút gạt */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #28a745; /* Màu xanh lá khi nút ở trạng thái enabled */
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Thêm bo tròn cho slider */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+/* CSS cho hiệu ứng loading */
+.loader {
+  border: 4px solid rgba(207, 204, 204, 0.1); /* Màu nền */
+  border-top: 4px solid #3498db; /* Màu của vòng quay */
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Modal container */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+/* Thiết kế nội dung modal */
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  width: 90%; /* Chỉnh kích thước chiều ngang */
+  max-width: 1100px; /* Tối đa chiều ngang */
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+/* Hiệu ứng mượt mà cho modal */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Phần header của modal */
+.modal-header {
+  background-color: #6c757d;
+  padding: 15px 30px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Tiêu đề trong header */
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  flex-grow: 1;
+  margin-left: -40px; /* Căn giữa hoàn hảo */
+}
+
+/* Đường kẻ dưới title */
+.modal-header::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: #fff;
+  margin-top: 10px;
+}
+
+/* Nội dung chính của modal */
+.modal-body {
+  padding: 20px 30px;
+  background-color: #f1f1f1;
+}
+
+/* Tiêu đề cho mỗi section */
+.section-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Rule mới - nổi bật bằng màu xanh */
+.new-rule-title {
+  color: #007bff; /* Màu xanh nổi bật */
+}
+
+/* Rule sửa đổi - nổi bật bằng màu cam */
+.modified-rule-title {
+  color: #e67e22; /* Màu cam nổi bật */
+}
+
+/* Phân biệt Remote và Local */
+.label-remote {
+  font-weight: bold;
+  color: #d32f2f; /* Màu đỏ cho Remote */
+}
+
+.label-local {
+  font-weight: bold;
+  color: #007bff; /* Màu xanh cho Local */
+}
+
+/* Highlight phần khác biệt trong màu đỏ tinh tế */
+.highlight {
+  background-color: #ffcccc; /* Nền đỏ nhạt */
+  color: #d32f2f; /* Màu đỏ tươi nhưng không quá chói */
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px; /* Bo góc nhẹ */
+  transition: background-color 0.3s ease; /* Hiệu ứng hover */
+}
+
+.highlight:hover {
+  background-color: #ff9999; /* Đổi nền khi hover */
+}
+
+/* Highlight phần tương đồng trong màu xanh nhạt */
+.highlight-similar {
+  background-color: #c8e6c9; /* Nền xanh nhạt */
+  color: #388e3c; /* Màu xanh đậm */
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.highlight-similar:hover {
+  background-color: #a5d6a7; /* Đổi nền khi hover */
+}
+
+/* Nút đóng modal */
+.close-btn {
+  color: #777; /* Màu xám nhạt cho nút đóng */
+  float: right;
+  font-size: 22px; /* Kích thước nhỏ gọn */
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease; /* Hiệu ứng đổi màu khi hover */
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: #000; /* Màu đen khi hover tạo điểm nhấn */
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Font chữ hiện đại và tinh tế */
+h3, h4 {
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  font-weight: 500;
+}
+
+p {
+  font-family: 'Roboto', sans-serif;
+  color: #555;
+  margin: 5px 0;
+  line-height: 1.6; /* Giãn dòng thoải mái hơn */
+}
+
+/* Đường kẻ ngang tinh tế */
+hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 15px 0;
+}
+
+/* Khoảng cách giữa các phần nội dung */
+p {
+  margin: 10px 0;
+}
+
+/* Thông báo có bản cập nhật mới với trạng thái nhấp nháy */
+.update-available {
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  animation: text-blink 1s infinite; /* Hiệu ứng nhấp nháy cho chữ */
+}
+
+@keyframes text-blink {
+  0%, 100% {
+    color: white;
+  }
+  50% {
+    color: #f1f1f1;
+  }
+}
+
+/* Thanh thông báo có bản cập nhật mới với hiệu ứng nhấp nháy màu nền */
+.update-available-blink {
+  animation: background-blink 1s infinite; /* Hiệu ứng nhấp nháy nền */
+}
+
+@keyframes background-blink {
+  0%, 100% {
+    background-color: #338a33; /* Màu xanh đậm */
+  }
+  50% {
+    background-color: #54c054; /* Màu xanh nhạt hơn */
+  }
+}
+
+
+/* Thông báo không có bản cập nhật mới - màu cam đậm */
+.no-update-available {
+  color: white;
+  font-weight: bold;
+  background-color: #e67e22; /* Màu cam đậm hơn */
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* Thanh thông báo */
+.notification-bar {
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+
+
