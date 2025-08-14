@@ -1,0 +1,19 @@
+Source-Makefile: package/bmc/bmcwebUI/Makefile
+
+Package: bmcwebUI
+Version: 1.0-r1
+Depends: +libc +node +libpthread
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: webUI
+Category: BMC
+Repository: base
+Title: BMC Web UI (Node.js Scripts)
+Maintainer: 
+Source: 
+Type: ipkg
+Description:   Custom BMC Web UI with Node.js scripts installed to /etc/bmcweb.
+@@
+
+

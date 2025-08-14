@@ -1,0 +1,19 @@
+Source-Makefile: package/bmc/bmcfirewall-core/Makefile
+
+Package: bmcfirewall-core
+Version: 1.0-r1
+Depends: +libc +libpthread
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: Firewall
+Category: BMC
+Repository: base
+Title: BMC Firewall Core
+Maintainer: 
+Source: 
+Type: ipkg
+Description:   Custom BMC Web UI with Node.js scripts installed to /etc/bmcweb.
+@@
+
+
